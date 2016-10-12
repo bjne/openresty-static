@@ -1,3 +1,6 @@
 [submodule "dependencies/nginx"]
 	path = dependencies/nginx
 	url = https://github.com/nginx/nginx
+[submodule "dependencies/openssl"]
+	path = dependencies/openssl
+	url = https://github.com/openssl/openssl
