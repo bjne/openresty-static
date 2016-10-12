@@ -1,0 +1,31 @@
+Index: nginx/auto/lib/zlib/make
+===================================================================
+--- nginx.orig/auto/lib/zlib/make
++++ nginx/auto/lib/zlib/make
+@@ -78,7 +78,7 @@ $ZLIB/libz.a:	$NGX_MAKEFILE
+ 	&& \$(MAKE) distclean \\
+ 	&& cp contrib/asm586/match.S . \\
+ 	&& CFLAGS="$ZLIB_OPT -DASMV" CC="\$(CC)" \\
+-		./configure \\
++		./configure --zlib-compat --static \\
+ 	&& \$(MAKE) OBJA=match.o libz.a
+ 
+ END
+@@ -95,7 +95,7 @@ $ZLIB/libz.a:	$NGX_MAKEFILE
+ 	&& \$(MAKE) distclean \\
+ 	&& cp contrib/asm686/match.S . \\
+ 	&& CFLAGS="$ZLIB_OPT -DASMV" CC="\$(CC)" \\
+-		./configure \\
++		./configure --zlib-compat --static \\
+ 	&& \$(MAKE) OBJA=match.o libz.a
+ 
+ END
+@@ -127,7 +127,7 @@ $ZLIB/libz.a:	$NGX_MAKEFILE
+ 	cd $ZLIB \\
+ 	&& \$(MAKE) distclean \\
+ 	&& CFLAGS="$ZLIB_OPT" CC="\$(CC)" \\
+-		./configure \\
++		./configure --zlib-compat --static \\
+ 	&& \$(MAKE) libz.a
+ 
+ END
