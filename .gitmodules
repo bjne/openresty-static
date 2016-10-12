@@ -14,3 +14,6 @@
 [submodule "dependencies/lua-cmsgpack"]
 	path = dependencies/lua-cmsgpack
 	url = https://github.com/antirez/lua-cmsgpack
+[submodule "dependencies/zlib-ng"]
+	path = dependencies/zlib-ng
+	url = https://github.com/Dead2/zlib-ng/
