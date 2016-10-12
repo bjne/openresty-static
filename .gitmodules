@@ -4,3 +4,7 @@
 [submodule "dependencies/openssl"]
 	path = dependencies/openssl
 	url = https://github.com/openssl/openssl
+[submodule "dependencies/luajit"]
+	path = dependencies/luajit
+	url = https://github.com/LuaJIT/LuaJIT
+	branch = v2.1
