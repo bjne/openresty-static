@@ -12,11 +12,14 @@ export LUAJIT_INC=$(LUADIR)
 
 LUAJIT_CFLAGS += -DLUAJIT_CJSON
 LUAJIT_CFLAGS += -DLUAJIT_CMSGPACK
+#	--with-http_ssl_module \
+
+NGINX_LD_OPTS += -L$(LUADIR) -lluajit-5.1
+NGINX_LD_OPTS += -Wl,-z,relro -Wl,-E
 
 NGINX_CONF_OPTS += \
 	--prefix=/opt/nginx \
 	--with-ipv6 \
-	--with-http_ssl_module \
 	--with-http_slice_module \
 	--with-http_stub_status_module \
 	--with-http_realip_module \
@@ -33,18 +36,14 @@ NGINX_CONF_OPTS += \
 	--with-sha1=$(BUILDDIR)/openssl \
 	--with-md5-asm \
 	--with-sha1-asm \
-	--with-cc-opt='-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -DTCP_FASTOPEN=23' \
-	--with-ld-opt='-Wl,-z,relro -Wl,-E' \
-	--with-ld-opt='-L$(LUADIR)'
-
-builddir:
-	mkdir -p $(BUILDDIR)
+	--with-cc-opt='-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -DTCP_FASTOPEN=23'
 
 %.src:
-	$(MAKE) $*.tar
-	$(MAKE) $*.patch
+	@$(MAKE) $*.tar
+	@$(MAKE) $*.patch
 
 %.tar:
+	mkdir -p $(BUILDDIR)
 	@cd $(DEPSDIR)/$* ; \
 	git archive --format tar --prefix $*/ HEAD | tar x -C $(BUILDDIR)
 
@@ -57,17 +56,21 @@ luajit: luajit.src
 
 lua-cjson: luajit.src lua-cjson.src
 	@OBJS="lua_cjson.o strbuf.o fpconv.o"
-	@LUA_INCLUDE_DIR=$(LUADIR) $(MAKE) -C $(BUILDDIR)/lua-cjson $(OBJS)
+	@LUA_INCLUDE_DIR=$(LUADIR) $(MAKE) -C $(BUILDDIR)/$@ $(OBJS)
+	ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
+	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
-lua-cmsgpack: lua_cmsgpack.o
+lua-cmsgpack: luajit.src lua-cmsgpack.src
+	@mkdir -p $(BUILDDIR)/$@
+	@cd $(BUILDDIR)/$@ ; gcc -I$(LUADIR) -O2 -Wall -std=c99 lua_cmsgpack.c -c
+	ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
+	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
-lua_cmsgpack.o: $(DEPSDIR)/lua-cmsgpack/lua_cmsgpack.c
-	@mkdir -p $(BUILDDIR)/lua-cmsgpack
-	@cd $(BUILDDIR)/lua-cmsgpack ; gcc -I$(LUADIR) -O2 -Wall -std=c99 $< -c
-
-nginx: builddir luajit lua-cjson lua-cmsgpack pcre.src openssl.src zlib-ng.src nginx.src
+nginx: luajit lua-cjson lua-cmsgpack pcre.src openssl.src zlib-ng.src nginx.src
+	$(eval NGINX_CONF_OPTS += --with-ld-opt='$(NGINX_LD_OPTS)')
+	echo $(NGINX_CONF_OPTS)
 	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGINX_CONF_OPTS)
-	make -C $(BUILDDIR)/nginx
+	$(MAKE) -C $(BUILDDIR)/nginx
 
 clean:
 	rm -rf $(BUILDDIR)/*
