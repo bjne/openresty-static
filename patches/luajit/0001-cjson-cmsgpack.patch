@@ -1,0 +1,34 @@
+--- luajit.old/src/lib_init.c	2016-10-12 23:25:51.604022360 +0200
++++ luajit/src/lib_init.c	2016-10-12 23:25:16.552481454 +0200
+@@ -15,6 +15,16 @@
+ 
+ #include "lj_arch.h"
+ 
++#ifdef LUAJIT_CJSON
++LUALIB_API int luaopen_cjson(lua_State *l);
++LUALIB_API int luaopen_cjson_safe(lua_State *l);
++#endif
++
++#ifdef LUAJIT_CMSGPACK
++LUALIB_API int luaopen_cmsgpack(lua_State *l);
++LUALIB_API int luaopen_cmsgpack_safe(lua_State *l);
++#endif
++
+ static const luaL_Reg lj_lib_load[] = {
+   { "",			luaopen_base },
+   { LUA_LOADLIBNAME,	luaopen_package },
+@@ -33,6 +43,14 @@
+ #if LJ_HASFFI
+   { LUA_FFILIBNAME,	luaopen_ffi },
+ #endif
++#ifdef LUAJIT_CJSON
++  { "cjson",		luaopen_cjson },
++  { "cjson.safe",	luaopen_cjson_safe },
++#endif
++#ifdef LUAJIT_CMSGPACK
++  { "cmsgpack",		luaopen_cmsgpack},
++  { "cmsgpack.safe",	luaopen_cmsgpack_safe },
++#endif
+   { NULL,		NULL }
+ };
+ 
