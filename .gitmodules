@@ -8,3 +8,6 @@
 	path = dependencies/luajit
 	url = https://github.com/LuaJIT/LuaJIT
 	branch = v2.1
+[submodule "dependencies/lua-cjson"]
+	path = dependencies/lua-cjson
+	url = https://github.com/openresty/lua-cjson
