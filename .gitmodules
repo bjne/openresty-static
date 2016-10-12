@@ -11,3 +11,6 @@
 [submodule "dependencies/lua-cjson"]
 	path = dependencies/lua-cjson
 	url = https://github.com/openresty/lua-cjson
+[submodule "dependencies/lua-cmsgpack"]
+	path = dependencies/lua-cmsgpack
+	url = https://github.com/antirez/lua-cmsgpack
