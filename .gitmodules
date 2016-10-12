@@ -17,3 +17,6 @@
 [submodule "dependencies/zlib-ng"]
 	path = dependencies/zlib-ng
 	url = https://github.com/Dead2/zlib-ng/
+[submodule "dependencies/lua-nginx-module"]
+	path = dependencies/lua-nginx-module
+	url = https://github.com/openresty/lua-nginx-module
