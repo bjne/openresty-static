@@ -3,6 +3,7 @@ all: nginx
 DEPSDIR=$(CURDIR)/dependencies
 BUILDDIR=$(CURDIR)/build
 PATCHDIR=$(CURDIR)/patches
+MODSDIR=$(CURDIR)/lua-modules
 
 LUADIR=$(BUILDDIR)/luajit/src
 
@@ -20,7 +21,7 @@ NGINX_CC_OPTS += -DTCP_FASTOPEN=23
 NGINX_LD_OPTS += -L$(LUADIR) -lluajit-5.1
 NGINX_LD_OPTS += -Wl,-z,relro -Wl,-E
 
-#	--with-http_ssl_module \
+LUA_MODULES = $(shell find $(MODSDIR)/*/lib -name "*.lua" -type f)
 
 NGINX_CONF_OPTS += \
 	--prefix=/opt/nginx \
@@ -33,10 +34,10 @@ NGINX_CONF_OPTS += \
 	--with-pcre=$(BUILDDIR)/pcre \
 	--with-pcre-jit \
 	--with-http_gzip_static_module \
+	--with-http_ssl_module \
 	--without-http_gzip_module \
 	--with-zlib=$(BUILDDIR)/zlib-ng \
 	--with-zlib-opt='-msse4.2 -mpclmul -O3 -static' \
-	--with-openssl=$(BUILDDIR)/openssl \
 	--with-md5=$(BUILDDIR)/openssl \
 	--with-sha1=$(BUILDDIR)/openssl \
 	--with-md5-asm \
@@ -70,19 +71,30 @@ lua-cmsgpack: luajit.src lua-cmsgpack.src
 	ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
 	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
-nginx: luajit lua-cjson lua-cmsgpack pcre.src openssl.src zlib-ng.src nginx.src
+openssl: $(BUILDDIR)/openssl/libssl.a $(BUILDDIR)/openssl/libcrypto.a
+	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive -ldl)
+	$(eval NGINX_CC_OPTS += -I$(BUILDDIR)/$@/include)
+
+$(BUILDDIR)/openssl/%.a: openssl.src
+	cd $(BUILDDIR)/openssl && ./config no-shared $(OPENSSL_OPTS)
+	$(MAKE) -C $(BUILDDIR)/openssl
+
+nginx: luajit lua-cjson lua-cmsgpack pcre.src openssl.src zlib-ng.src lua-modules openssl nginx.src
 	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGINX_CONF_OPTS) \
 		--with-cc-opt='$(NGINX_CC_OPTS)' \
 		--with-ld-opt='$(NGINX_LD_OPTS)'
 
 	$(MAKE) -C $(BUILDDIR)/nginx
 
-%.lua:
+%.lua.build:
 	@mkdir -p $(BUILDDIR)/lua-modules
-	$(LUADIR)/luajit -bg $* $(BUILDDIR)/lua-modules/$*.o
+	$(eval MODNAME=$(shell echo $*|sed 's|.*/lib/\(.*\)|\1|'|sed 's|/|_|g'))
+	@ln -sf $*.lua $(BUILDDIR)/lua-modules/$(MODNAME).lua
+	@luajit -bg $(BUILDDIR)/lua-modules/$(MODNAME).lua $(BUILDDIR)/lua-modules/$(MODNAME).lua.o
 
-lua-modules:
-	ar rcus $(BUILDDIR)/lua-modules/lib$@.a $(BUILDDIR)/$@/*.o
+lua-modules: $(foreach module,$(LUA_MODULES),$(module).build)
+	@ar rcus $(BUILDDIR)/lua-modules/lib$@.a $(BUILDDIR)/$@/*.o
+	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -l$@ -Wl,--no-whole-archive)
 
 clean:
 	rm -rf $(BUILDDIR)/*
