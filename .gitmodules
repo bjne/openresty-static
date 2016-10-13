@@ -53,3 +53,6 @@
 [submodule "dependencies/echo-nginx-module"]
 	path = dependencies/echo-nginx-module
 	url = https://github.com/openresty/echo-nginx-module
+[submodule "dependencies/srcache-nginx-module"]
+	path = dependencies/srcache-nginx-module
+	url = https://github.com/openresty/srcache-nginx-module
