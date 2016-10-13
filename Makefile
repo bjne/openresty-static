@@ -30,6 +30,7 @@ NGINX_CONF_OPTS += \
 	--with-http_stub_status_module \
 	--with-http_realip_module \
 	--with-http_auth_request_module \
+	--add-module=$(DEPSDIR)/ngx_devel_kit \
 	--add-module=$(DEPSDIR)/lua-nginx-module \
 	--add-module=$(DEPSDIR)/set-misc-nginx-module \
 	--add-module=$(DEPSDIR)/ngx_coolkit \
