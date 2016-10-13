@@ -44,3 +44,6 @@
 [submodule "lua-modules/lua-resty-lrucache"]
 	path = lua-modules/lua-resty-lrucache
 	url = https://github.com/openresty/lua-resty-lrucache
+[submodule "lua-modules/lua-resty-websocket"]
+	path = lua-modules/lua-resty-websocket
+	url = https://github.com/openresty/lua-resty-websocket
