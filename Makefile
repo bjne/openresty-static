@@ -1,4 +1,4 @@
-all: luajit lua-cjson lua-cmsgpack nginx
+all: nginx
 
 DEPSDIR=$(CURDIR)/dependencies
 BUILDDIR=$(CURDIR)/build
@@ -8,14 +8,19 @@ LUADIR=$(BUILDDIR)/luajit/src
 
 export LUAJIT_LIB=$(LUADIR)
 export LUAJIT_INC=$(LUADIR)
-#export LUA_INCLUDE_DIR=$(LUAJIT_INC)
 
 LUAJIT_CFLAGS += -DLUAJIT_CJSON
 LUAJIT_CFLAGS += -DLUAJIT_CMSGPACK
-#	--with-http_ssl_module \
+
+NGINX_CC_OPTS += -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2
+NGINX_CC_OPTS += -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4
+NGINX_CC_OPTS += -grecord-gcc-switches -m64 -mtune=generic
+NGINX_CC_OPTS += -DTCP_FASTOPEN=23
 
 NGINX_LD_OPTS += -L$(LUADIR) -lluajit-5.1
 NGINX_LD_OPTS += -Wl,-z,relro -Wl,-E
+
+#	--with-http_ssl_module \
 
 NGINX_CONF_OPTS += \
 	--prefix=/opt/nginx \
@@ -35,8 +40,7 @@ NGINX_CONF_OPTS += \
 	--with-md5=$(BUILDDIR)/openssl \
 	--with-sha1=$(BUILDDIR)/openssl \
 	--with-md5-asm \
-	--with-sha1-asm \
-	--with-cc-opt='-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -DTCP_FASTOPEN=23'
+	--with-sha1-asm
 
 %.src:
 	@$(MAKE) $*.tar
@@ -67,10 +71,18 @@ lua-cmsgpack: luajit.src lua-cmsgpack.src
 	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
 nginx: luajit lua-cjson lua-cmsgpack pcre.src openssl.src zlib-ng.src nginx.src
-	$(eval NGINX_CONF_OPTS += --with-ld-opt='$(NGINX_LD_OPTS)')
-	echo $(NGINX_CONF_OPTS)
-	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGINX_CONF_OPTS)
+	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGINX_CONF_OPTS) \
+		--with-cc-opt='$(NGINX_CC_OPTS)' \
+		--with-ld-opt='$(NGINX_LD_OPTS)'
+
 	$(MAKE) -C $(BUILDDIR)/nginx
+
+%.lua:
+	@mkdir -p $(BUILDDIR)/lua-modules
+	$(LUADIR)/luajit -bg $* $(BUILDDIR)/lua-modules/$*.o
+
+lua-modules:
+	ar rcus $(BUILDDIR)/lua-modules/lib$@.a $(BUILDDIR)/$@/*.o
 
 clean:
 	rm -rf $(BUILDDIR)/*
