@@ -26,3 +26,6 @@
 [submodule "lua-modules/lua-resty-string"]
 	path = lua-modules/lua-resty-string
 	url = https://github.com/openresty/lua-resty-string
+[submodule "dependencies/set-misc-nginx-module"]
+	path = dependencies/set-misc-nginx-module
+	url = https://github.com/openresty/set-misc-nginx-module
