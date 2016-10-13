@@ -31,9 +31,10 @@ NGINX_CONF_OPTS += \
 	--with-http_realip_module \
 	--with-http_auth_request_module \
 	--add-module=$(DEPSDIR)/ngx_devel_kit \
-	--add-module=$(DEPSDIR)/lua-nginx-module \
-	--add-module=$(DEPSDIR)/set-misc-nginx-module \
 	--add-module=$(DEPSDIR)/ngx_coolkit \
+	--add-module=$(DEPSDIR)/set-misc-nginx-module \
+	--add-module=$(DEPSDIR)/echo-nginx-module \
+	--add-module=$(DEPSDIR)/lua-nginx-module \
 	--with-pcre=$(BUILDDIR)/pcre \
 	--with-pcre-jit \
 	--with-http_gzip_static_module \
@@ -74,11 +75,11 @@ lua-cmsgpack: luajit.src lua-cmsgpack.src
 	ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
 	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
-openssl: $(BUILDDIR)/openssl/libssl.a $(BUILDDIR)/openssl/libcrypto.a
+openssl: openssl.src $(BUILDDIR)/openssl/libssl.a $(BUILDDIR)/openssl/libcrypto.a
 	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive -ldl)
 	$(eval NGINX_CC_OPTS += -I$(BUILDDIR)/$@/include)
 
-$(BUILDDIR)/openssl/%.a: openssl.src
+$(BUILDDIR)/openssl/%.a:
 	cd $(BUILDDIR)/openssl && ./config no-shared $(OPENSSL_OPTS)
 	$(MAKE) -C $(BUILDDIR)/openssl
 
