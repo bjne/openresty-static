@@ -31,6 +31,8 @@ NGINX_CONF_OPTS += \
 	--with-http_realip_module \
 	--with-http_auth_request_module \
 	--add-module=$(DEPSDIR)/lua-nginx-module \
+	--add-module=$(DEPSDIR)/set-misc-nginx-module \
+	--add-module=$(DEPSDIR)/ngx_coolkit \
 	--with-pcre=$(BUILDDIR)/pcre \
 	--with-pcre-jit \
 	--with-http_gzip_static_module \
