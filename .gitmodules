@@ -23,3 +23,6 @@
 [submodule "lua-modules/lua-resty-core"]
 	path = lua-modules/lua-resty-core
 	url = https://github.com/openresty/lua-resty-core
+[submodule "lua-modules/lua-resty-string"]
+	path = lua-modules/lua-resty-string
+	url = https://github.com/openresty/lua-resty-string
