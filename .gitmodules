@@ -20,3 +20,6 @@
 [submodule "dependencies/lua-nginx-module"]
 	path = dependencies/lua-nginx-module
 	url = https://github.com/openresty/lua-nginx-module
+[submodule "lua-modules/lua-resty-core"]
+	path = lua-modules/lua-resty-core
+	url = https://github.com/openresty/lua-resty-core
