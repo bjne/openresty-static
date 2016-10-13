@@ -38,3 +38,6 @@
 [submodule "lua-modules/lua-resty-dns"]
 	path = lua-modules/lua-resty-dns
 	url = https://github.com/openresty/lua-resty-dns
+[submodule "lua-modules/lua-resty-lock"]
+	path = lua-modules/lua-resty-lock
+	url = https://github.com/openresty/lua-resty-lock
