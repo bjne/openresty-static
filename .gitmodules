@@ -32,3 +32,6 @@
 [submodule "dependencies/ngx_coolkit"]
 	path = dependencies/ngx_coolkit
 	url = https://github.com/FRiCKLE/ngx_coolkit
+[submodule "dependencies/ngx_devel_kit"]
+	path = dependencies/ngx_devel_kit
+	url = https://github.com/simpl/ngx_devel_kit
