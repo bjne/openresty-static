@@ -1,6 +1,6 @@
 - array-var-nginx-module
 - drizzle-nginx-module
-- echo-nginx-module
+= echo-nginx-module
 - encrypted-session-nginx-module
 - form-input-nginx-module
 - headers-more-nginx-module

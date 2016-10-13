@@ -52,12 +52,12 @@ NGINX_CONF_OPTS += \
 	@$(MAKE) $*.patch
 
 %.tar:
-	mkdir -p $(BUILDDIR)
+	@mkdir -p $(BUILDDIR)
 	@cd $(DEPSDIR)/$* ; \
-	git archive --format tar --prefix $*/ HEAD | tar x -C $(BUILDDIR)
+		git archive --format tar --prefix $*/ HEAD | tar x -C $(BUILDDIR)
 
 %.patch:
-	cat $(PATCHDIR)/$*/* | patch -p1 -d $(BUILDDIR)/$*
+	@cat $(PATCHDIR)/$*/* 2>/dev/null|patch -p1 -d $(BUILDDIR)/$*
 
 luajit: luajit.src
 	@CFLAGS="$(LUAJIT_CFLAGS)" make -C $(BUILDDIR)/luajit/src libluajit.a
@@ -66,13 +66,13 @@ luajit: luajit.src
 lua-cjson: luajit.src lua-cjson.src
 	@OBJS="lua_cjson.o strbuf.o fpconv.o"
 	@LUA_INCLUDE_DIR=$(LUADIR) $(MAKE) -C $(BUILDDIR)/$@ $(OBJS)
-	ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
+	@ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
 	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
 lua-cmsgpack: luajit.src lua-cmsgpack.src
 	@mkdir -p $(BUILDDIR)/$@
 	@cd $(BUILDDIR)/$@ ; gcc -I$(LUADIR) -O2 -Wall -std=c99 lua_cmsgpack.c -c
-	ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
+	@ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
 	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
 openssl: openssl.src $(BUILDDIR)/openssl/libssl.a $(BUILDDIR)/openssl/libcrypto.a
