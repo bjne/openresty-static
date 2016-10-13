@@ -41,3 +41,6 @@
 [submodule "lua-modules/lua-resty-lock"]
 	path = lua-modules/lua-resty-lock
 	url = https://github.com/openresty/lua-resty-lock
+[submodule "lua-modules/lua-resty-lrucache"]
+	path = lua-modules/lua-resty-lrucache
+	url = https://github.com/openresty/lua-resty-lrucache
