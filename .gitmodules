@@ -47,3 +47,6 @@
 [submodule "lua-modules/lua-resty-websocket"]
 	path = lua-modules/lua-resty-websocket
 	url = https://github.com/openresty/lua-resty-websocket
+[submodule "lua-modules/lua-resty-upstream-healthcheck"]
+	path = lua-modules/lua-resty-upstream-healthcheck
+	url = https://github.com/openresty/lua-resty-upstream-healthcheck
