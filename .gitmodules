@@ -29,3 +29,6 @@
 [submodule "dependencies/set-misc-nginx-module"]
 	path = dependencies/set-misc-nginx-module
 	url = https://github.com/openresty/set-misc-nginx-module
+[submodule "dependencies/ngx_coolkit"]
+	path = dependencies/ngx_coolkit
+	url = https://github.com/FRiCKLE/ngx_coolkit
