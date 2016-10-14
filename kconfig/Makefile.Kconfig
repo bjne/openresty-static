@@ -35,9 +35,9 @@ else
 endif
 
 ifeq ($(NGX_WITH_POLL), y)
-	NGX_CFG += --with-poll
+	NGX_CFG += --with-poll_module
 else
-	NGX_CFG += --without-poll
+	NGX_CFG += --without-poll_module
 endif
 
 ifeq ($(NGX_WITH_THREADS), y)
