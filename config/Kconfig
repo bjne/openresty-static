@@ -829,6 +829,12 @@ config NGX_MODULE_ENCRYPTED_SESSION_NGINX_MODULE
 	  Usually, you just decrypt data in nginx level, and pass the unencrypted
 	  data to your FastCGI/HTTP backend, as in
 
+config NGX_MODULE_ICONV_NGINX_MODULE
+	bool "iconv-nginx-module"
+	default n
+	---help---
+	  Character conversion nginx module using libiconv
+
 config NGX_MODULE_NGINX_RTMP_MODULE
 	bool "nginx-rtmp-module"
 	default n
