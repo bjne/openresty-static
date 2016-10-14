@@ -795,6 +795,12 @@ config NGX_MODULE_STREAM_LUA_NGINX_MODULE
 
 	  https://github.com/openresty/stream-lua-nginx-module
 
+config NGX_MODULE_HEADERS_MORE_NGINX_MODULE
+	bool "headers-more-nginx-module"
+	default n
+	---help---
+	  Set, add, and clear arbitrary output headers in NGINX http servers
+
 comment "(encrypted-session-nginx-module) depends on 'HTTP->SSL/TLS support'"
 	depends on !NGX_WITH_HTTP_SSL_MODULE
 

@@ -312,6 +312,10 @@ ifeq ($(NGX_MODULE_STREAM_LUA_NGINX_MODULE), y)
 	NGX_CFG += --add-module=$(DEPSDIR)/stream-lua-nginx-module
 endif
 
+ifeq ($(NGX_MODULE_HEADERS_MORE_NGINX_MODULE), y)
+	NGX_CFG += --add-module=$(DEPSDIR)/headers-more-nginx-module
+endif
+
 ifeq ($(NGX_MODULE_ENCRYPTED_SESSION_NGINX_MODULE), y)
 	NGX_CFG += --add-module=$(DEPSDIR)/encrypted-session-nginx-module
 endif
