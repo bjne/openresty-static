@@ -62,3 +62,6 @@
 [submodule "dependencies/nginx-rtmp-module"]
 	path = dependencies/nginx-rtmp-module
 	url = https://github.com/arut/nginx-rtmp-module
+[submodule "lua-modules/lua-resty-mysql"]
+	path = lua-modules/lua-resty-mysql
+	url = https://github.com/openresty/lua-resty-mysql

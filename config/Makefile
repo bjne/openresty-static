@@ -360,6 +360,10 @@ ifeq ($(LUA_MODULE_RESTY_LRUCACHE), y)
 	LUA_MODS += lua-resty-lrucache
 endif
 
+ifeq ($(LUA_MODULE_RESTY_MYSQL), y)
+	LUA_MODS += lua-resty-mysql
+endif
+
 ifeq ($(LUA_MODULE_RESTY_STRING), y)
 	LUA_MODS += lua-resty-string
 endif

@@ -958,6 +958,12 @@ depends on NGX_MODULE_LUA_NGINX_MODULE||NGX_MODULE_STREAM_LUA_NGINX_MODULE
 
 		  https://github.com/openresty/lua-resty-lrucache
 
+	config LUA_MODULE_RESTY_MYSQL
+		bool "resty.mysql"
+		default n
+		---help---
+		  Lua MySQL client driver for ngx_lua based on the cosocket API
+
 	comment "(resty.string) depends on 'Enable SSL'"
 		depends on !ENABLE_SSL
 
