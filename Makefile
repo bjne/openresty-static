@@ -1,7 +1,5 @@
 all: nginx
 
-include kconfig/Makefile.Kconfig
-
 DEPSDIR=$(CURDIR)/dependencies
 MODSDIR=$(CURDIR)/lua-modules
 
@@ -20,6 +18,8 @@ NGX_CC_OPTS += -grecord-gcc-switches -m64 -mtune=generic
 NGX_LD_OPTS += -L$(LUADIR) -lluajit-5.1
 NGX_LD_OPTS += -Wl,-z,relro -Wl,-E
 
+include kconfig/Makefile.Kconfig
+
 LUA_MODULES += $(foreach m,$(LUA_MODS),$(shell find $(MODSDIR)/$(m)/lib -name "*.lua"))
 
 %.src:
@@ -35,8 +35,8 @@ LUA_MODULES += $(foreach m,$(LUA_MODS),$(shell find $(MODSDIR)/$(m)/lib -name "*
 	@cat $(PATCHDIR)/$*/* 2>/dev/null|patch -p1 -d $(BUILDDIR)/$*
 
 luajit: luajit.src $(LUAJIT_TARGETS)
-	@CFLAGS="$(LUAJIT_CFLAGS)" make -C $(BUILDDIR)/luajit/src libluajit.a
-	@ln -sf $(BUILDDIR)/libluajit.a $(BUILDDIR)/libluajit-5.1.a
+	@CFLAGS="$(LUAJIT_CFLAGS)" make -C $(LUADIR) libluajit.a
+	@ln -sf $(LUADIR)/libluajit.a $(LUADIR)/libluajit-5.1.a
 
 lua-cjson: luajit.src lua-cjson.src
 	@OBJS="lua_cjson.o strbuf.o fpconv.o"
@@ -68,16 +68,21 @@ lua-modules: $(foreach module,$(LUA_MODULES),$(module).build)
 	@ar rcus $(BUILDDIR)/lua-modules/lib$@.a $(BUILDDIR)/$@/*.o
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -l$@ -Wl,--no-whole-archive)
 
+%config: ;
+	@touch $(CURDIR)/.config
+	@mkdir -p $(BUILDDIR)/kconfig/lxdialog
+	make -f kconfig/GNUmakefile TOPDIR=. SRCDIR=kconfig BUILDDIR=$(BUILDDIR) $@
+
 nginx: $(NGX_TARGETS) zlib-ng.src nginx.src
 	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGX_CFG) \
 		--with-cc-opt='$(NGX_CC_OPTS)' \
 		--with-ld-opt='$(NGX_LD_OPTS)'
 
 	$(MAKE) -C $(BUILDDIR)/nginx
-
-%config: ;
-	@touch $(CURDIR)/.config
-	make -f kconfig/GNUmakefile TOPDIR=. SRCDIR=kconfig $@
+	mkdir -p $(BUILDDIR)/bin
+	@cp $(BUILDDIR)/$@/objs/$@ $(BUILDDIR)/bin
+	@strip $(BUILDDIR)/bin/nginx
+	@which upx >/dev/null && upx --best --ultra-brute $(BUILDDIR)/bin/nginx
 
 clean:
 	rm -rf $(BUILDDIR)/*
