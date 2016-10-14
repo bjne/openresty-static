@@ -22,7 +22,7 @@ SRCDIR=.
 O=$(BUILDDIR)/kconfig
 
 # Build configuration
-KBUILD_KCONFIG=$(TOPDIR)/$(SRCDIR)/Kconfig
+KBUILD_KCONFIG=$(TOPDIR)/$(SRCDIR)/../Kconfig
 KBUILD_CONFIG_DIR=configs
 KBUILD_DEFCONFIG=defconfig
 

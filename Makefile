@@ -1,5 +1,3 @@
-all: nginx
-
 DEPSDIR=$(CURDIR)/dependencies
 MODSDIR=$(CURDIR)/lua-modules
 
@@ -15,12 +13,13 @@ NGX_CC_OPTS += -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2
 NGX_CC_OPTS += -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4
 NGX_CC_OPTS += -grecord-gcc-switches -m64 -mtune=generic
 
-NGX_LD_OPTS += -L$(LUADIR) -lluajit-5.1
 NGX_LD_OPTS += -Wl,-z,relro -Wl,-E
 
-include kconfig/Makefile.Kconfig
+include config/Makefile
 
 LUA_MODULES += $(foreach m,$(LUA_MODS),$(shell find $(MODSDIR)/$(m)/lib -name "*.lua"))
+
+all: nginx
 
 %.src:
 	@$(MAKE) $*.tar
@@ -71,7 +70,7 @@ lua-modules: $(foreach module,$(LUA_MODULES),$(module).build)
 %config: ;
 	@touch $(CURDIR)/.config
 	@mkdir -p $(BUILDDIR)/kconfig/lxdialog
-	make -f kconfig/GNUmakefile TOPDIR=. SRCDIR=kconfig BUILDDIR=$(BUILDDIR) $@
+	make -f config/kconfig/GNUmakefile TOPDIR=. SRCDIR=config/kconfig BUILDDIR=$(BUILDDIR) CONFIG_= $@
 
 nginx: $(NGX_TARGETS) zlib-ng.src nginx.src
 	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGX_CFG) \

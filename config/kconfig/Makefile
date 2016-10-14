@@ -80,7 +80,8 @@ update-po-config: $(obj)/kxgettext $(obj)/gconf.glade.h
 
 PHONY += allnoconfig allyesconfig allmodconfig alldefconfig randconfig
 
-CFLAGS += -I$(src)
+CFLAGS += -I$(src) $(HOST_EXTRACFLAGS)
+
 
 allnoconfig allyesconfig allmodconfig alldefconfig randconfig: $(obj)/conf
 	$< --$@ $(Kconfig)
