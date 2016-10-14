@@ -21,7 +21,6 @@
 = lua-resty-upstream-healthcheck
 = lua-resty-websocket
 - memc-nginx-module
-- nginx-no_pool.patch
 = ngx_coolkit
 = ngx_devel_kit
 - ngx_lua_upstream
@@ -32,7 +31,8 @@
 - redis-nginx-module
 - resty-cli
 = set-misc-nginx-module
-- srcache-nginx-module
+= srcache-nginx-module
 - xss-nginx-module
 
 + lua-cmsgpack
++ stream-lua-nginx-module
