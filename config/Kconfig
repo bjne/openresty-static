@@ -974,6 +974,12 @@ depends on NGX_MODULE_LUA_NGINX_MODULE||NGX_MODULE_STREAM_LUA_NGINX_MODULE
 
 		   https://github.com/openresty/lua-resty-lock
 
+	config LUA_RESTY_LOGGER_SOCKET
+		bool "resty.logger.socket"
+		default n
+		---help---
+		  Nonblocking remote access logging for Nginx
+
 	config LUA_MODULE_RESTY_LRUCACHE
 		bool "resty.lrucache"
 		default y

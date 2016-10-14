@@ -92,3 +92,6 @@
 [submodule "lua-modules/lua-resty-kyototycoon"]
 	path = lua-modules/lua-resty-kyototycoon
 	url = https://github.com/cloudflare/lua-resty-kyototycoon
+[submodule "lua-modules/lua-resty-logger-socket"]
+	path = lua-modules/lua-resty-logger-socket
+	url = https://github.com/cloudflare/lua-resty-logger-socket

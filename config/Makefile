@@ -386,6 +386,10 @@ ifeq ($(LUA_MODULE_RESTY_LOCK), y)
 	LUA_MODS += lua-resty-lock/lib
 endif
 
+ifeq ($(LUA_RESTY_LOGGER_SOCKET), y)
+	LUA_MODS += lua-resty-logger-socket/lib
+endif
+
 ifeq ($(LUA_MODULE_RESTY_LRUCACHE), y)
 	LUA_MODS += lua-resty-lrucache/lib
 endif
