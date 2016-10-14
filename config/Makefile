@@ -378,6 +378,10 @@ ifeq ($(LUA_MODULE_RESTY_DNS), y)
 	LUA_MODS += lua-resty-dns/lib
 endif
 
+ifeq ($(LUA_MODULE_RESTY_KAFKA), y)
+	LUA_MODS += lua-resty-kafka/lib
+endif
+
 ifeq ($(LUA_MODULE_RESTY_KYOTOTYCOON), y)
 	LUA_MODS += lua-resty-kyototycoon/lib
 endif

@@ -95,3 +95,6 @@
 [submodule "lua-modules/lua-resty-logger-socket"]
 	path = lua-modules/lua-resty-logger-socket
 	url = https://github.com/cloudflare/lua-resty-logger-socket
+[submodule "lua-modules/lua-resty-kafka"]
+	path = lua-modules/lua-resty-kafka
+	url = https://github.com/doujiang24/lua-resty-kafka

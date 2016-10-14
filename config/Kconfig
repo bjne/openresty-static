@@ -958,6 +958,14 @@ depends on NGX_MODULE_LUA_NGINX_MODULE||NGX_MODULE_STREAM_LUA_NGINX_MODULE
 
 		  https://github.com/openresty/lua-resty-dns
 
+	config LUA_MODULE_RESTY_KAFKA
+		bool "resty.kafka"
+		default n
+		---help---
+		  Lua kafka client driver for the Openresty based on the cosocket API
+
+		  https://github.com/doujiang24/lua-resty-kafka
+
 	config LUA_MODULE_RESTY_KYOTOTYCOON
 		bool "resty.kyototycoon"
 		default n
