@@ -80,6 +80,8 @@ update-po-config: $(obj)/kxgettext $(obj)/gconf.glade.h
 
 PHONY += allnoconfig allyesconfig allmodconfig alldefconfig randconfig
 
+CFLAGS += -I$(src)
+
 allnoconfig allyesconfig allmodconfig alldefconfig randconfig: $(obj)/conf
 	$< --$@ $(Kconfig)
 
@@ -308,6 +310,8 @@ $(obj)/.tmp_gtkcheck:
 		false;									\
 	fi
 endif
+
+	#$(HOSTCC) -I$(src) -c -o $@
 
 $(obj)/zconf.tab.o: $(obj)/zconf.lex.c $(obj)/zconf.hash.c
 

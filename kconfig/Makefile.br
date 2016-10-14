@@ -19,7 +19,7 @@ host-cxxmulti := $(addprefix $(obj)/,$(foreach m,$(__hostprogs),\
 host-cobjs := $(addprefix $(obj)/,$(sort $(foreach m,$(__hostprogs),$($(m)-objs))))
 host-cxxobjs := $(addprefix $(obj)/,$(sort $(foreach m,$(__hostprogs),$($(m)-cxxobjs))))
 
-HOST_EXTRACFLAGS += -I$(obj) -DCONFIG_=\"\"
+HOST_EXTRACFLAGS += -I$(obj) -I$(src) -DCONFIG_=\"\"
 
 $(host-csingle): %: %.c
 	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCFLAGS_$(@F)) $< -o $@
@@ -30,10 +30,10 @@ $(host-cmulti): %: $(host-cobjs) $(host-cshlib)
 $(host-cxxmulti): %: $(host-cxxobjs) $(host-cobjs) $(host-cshlib)
 	$(HOSTCXX) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCXXFLAGS_$(@F)) $(addprefix $(obj)/,$($(@F)-objs) $($(@F)-cxxobjs)) $(HOSTLOADLIBES_$(@F)) -o $@
 
-#$(obj)/%.o: %.c
-#	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCFLAGS_$(@F)) -c $< -o $@
+$(obj)/%.o: %.c
+	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCFLAGS_$(@F)) -c $< -o $@
 
-$(obj)/%.o: $(obj)/%.c
+$(obj)/%.o: $(src)/%.c
 	$(HOSTCC) $(HOST_EXTRACFLAGS) $(HOSTCFLAGS) $(HOSTCFLAGS_$(@F)) -c $< -o $@
 
 $(obj)/%.o: %.cc

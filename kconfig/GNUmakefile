@@ -19,10 +19,10 @@ TOPDIR=.
 SRCDIR=.
 
 # O: output directory (objs/exes), default to src dir
-O=$(TOPDIR)/$(SRCDIR)
+O=$(BUILDDIR)/kconfig
 
 # Build configuration
-KBUILD_KCONFIG=$(O)/Kconfig
+KBUILD_KCONFIG=$(TOPDIR)/$(SRCDIR)/Kconfig
 KBUILD_CONFIG_DIR=configs
 KBUILD_DEFCONFIG=defconfig
 
@@ -45,7 +45,7 @@ export $(PRODUCT_ENV)_CONFIG=.config
 # Buid vars
 HOSTCC=$(CC)
 HOSTCXX=$(CXX)
-HOSTCFLAGS=-O2 -g
+HOSTCFLAGS=-O2 -g -I$(TOPDIR)/$(SRCDIR)
 HOSTCXXFLAGS=-O2 -g
 srctree=$(TOPDIR)
 src=$(TOPDIR)/$(SRCDIR)
