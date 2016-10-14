@@ -19,6 +19,20 @@ menu "Global settings"
 		bool "Enable SSL"
 		default y
 
+	config NGX_WITH_SELECT
+		bool "Enable select()"
+		default n
+		---help---
+		  Should only be enabled when system does not support
+		  kqueue, epoll, or /dev/poll.
+
+	config NGX_WITH_POLL
+		bool "Enable poll()"
+		default n
+		---help---
+		  Should only be enabled when system does not support
+		  kqueue, epoll, or /dev/poll.
+
 	config ENABLE_DEBUG
 		bool "Enable debug"
 		default n
@@ -95,6 +109,11 @@ if NGX_WITH_HTTP
 		config NGX_WITH_HTTP_SLICE_MODULE
 			bool "slice module"
 			default n
+			---help---
+			  The ngx_http_slice_module module is a filter that splits a request
+			  into subrequests, each returning a certain range of response. The
+			  filter provides more effective caching of big responses. 
+
 	endif #NGX_WITH_HTTP_CACHE
 
 	config NGX_WITH_HTTP_REALIP_MODULE
@@ -151,22 +170,18 @@ if NGX_WITH_HTTP
 		  automation via the WebDAV protocol. The module processes HTTP and
 		  WebDAV methods PUT, DELETE, MKCOL, COPY, and MOVE.
 
-	menuconfig _NGX_WITH_VIDEO
-		bool "video related modules"
-		default n
-
-	if _NGX_WITH_VIDEO
+	menu "Video modules"
 		config NGX_WITH_HTTP_FLV_MODULE
 			bool "flv module"
 			default n
 			---help---
-			The ngx_http_flv_module module provides pseudo-streaming server-side
-			support for Flash Video (FLV) files.
+			  The ngx_http_flv_module module provides pseudo-streaming
+			  server-side support for Flash Video (FLV) files.
 
-			It handles requests with the start argument in the request URI’s
-			query string specially, by sending back the contents of a file
-			starting from the requested byte offset and with the prepended FLV
-			header.
+			  It handles requests with the start argument in the request URI’s
+			  query string specially, by sending back the contents of a file
+			  starting from the requested byte offset and with the prepended FLV
+			  header.
 
 		config NGX_WITH_HTTP_MP4_MODULE
 			bool "mp4 module"
@@ -187,7 +202,7 @@ if NGX_WITH_HTTP
 
 			  This allows performing a random seeking at any time, or starting
 			  playback in the middle of the timeline.
-	endif #_NGX_WITH_VIDEO
+	endmenu #Video modules
 
 	config NGX_WITH_HTTP_AUTH_REQUEST_MODULE
 		bool "auth request module"
@@ -199,121 +214,407 @@ if NGX_WITH_HTTP
 		  or 403, the access is denied with the corresponding error code. Any
 		  other response code returned by the subrequest is considered an error.
 
-		  For the 401 error, the client also receives the “WWW-Authenticate”
-		  header from the subrequest response. 
+		  For the 401 error, the client also receives the "WWW-Authenticate"
+		  header from the subrequest response.
 
-	menuconfig _NGX_WITH_COMPRESSION
-		bool "compression support"
-		default y
-
-	if _NGX_WITH_COMPRESSION
+	menu "Compression modules"
 		config NGX_WITH_HTTP_GZIP_MODULE
 			bool "gzip module"
 			select ENABLE_ZLIB
 			default y
+			---help---
+			  The ngx_http_gzip_module module is a filter that compresses
+			  responses using the "gzip" method. This often helps to reduce the
+			  size of transmitted data by half or even more.
 
 		config NGX_WITH_HTTP_GUNZIP_MODULE
 			bool "gunzip module"
 			select ENABLE_ZLIB
 			default n
+			---help---
+			  The ngx_http_gunzip_module module is a filter that decompresses
+			  responses with "Content-Encoding: gzip" for clients that do not
+			  support "gzip" encoding method. The module will be useful when it
+			  is desirable to store data compressed to save space and reduce I/O
+			  costs.
 
 		config NGX_WITH_HTTP_GZIP_STATIC_MODULE
 			bool "gzip static module"
 			select ENABLE_ZLIB
 			default n
-	endif #_NGX_WITH_COMPRESSION
+			---help---
+			  The ngx_http_gzip_static_module module allows sending
+			  precompressed files with the ".gz" filename extension instead of
+			  regular files.  endif #_NGX_WITH_COMPRESSION
+	endmenu #Compression modules
 
 	config NGX_WITH_HTTP_RANDOM_INDEX_MODULE
 		bool "random index module"
 		default n
+		---help---
+		  The ngx_http_random_index_module module processes requests ending with
+		  the slash character (‘/’) and picks a random file in a directory to
+		  serve as an index file. The module is processed before the
+		  ngx_http_index_module module.
 
 	config NGX_WITH_HTTP_SECURE_LINK_MODULE
 		bool "secure link module"
 		default n
+		---help---
+		  The ngx_http_secure_link_module module is used to check authenticity
+		  of requested links, protect resources from unauthorized access, and
+		  limit link lifetime.
+
+		  The authenticity of a requested link is verified by comparing the
+		  checksum value passed in a request with the value computed for the
+		  request. If a link has a limited lifetime and the time has expired,
+		  the link is considered outdated. The status of these checks is made
+		  available in the $secure_link variable.
+
+		  The module provides two alternative operation modes. The first mode is
+		  enabled by the secure_link_secret directive and is used to check
+		  authenticity of requested links as well as protect resources from
+		  unauthorized access. The second mode is enabled by the secure_link and
+		  secure_link_md5 directives and is also used to limit lifetime of
+		  links.
 
 	config NGX_WITH_HTTP_DEGRADATION_MODULE
 		bool "degradation module"
 		default n
+		---help---
+		  ngx_http_degradation_module orders Nginx to serve a particular error
+		  page when low memory conditions are met.
 
 	config NGX_WITH_HTTP_STUB_STATUS_MODULE
 		bool "stub status module"
 		default n
+		---help---
+		  The ngx_http_stub_status_module module provides access to basic status
+		  information.
 
 	config NGX_WITH_HTTP_CHARSET_MODULE
 		bool "charset module"
 		default y
+		---help---
+		   The ngx_http_charset_module module adds the specified charset to the
+		   "Content-Type" response header field. In addition, the module can
+		   convert data from one charset to another, with some limitations:
+
+		    * conversion is performed one way - from server to client,
+		    * only single-byte charsets can be converted
+		    * or single-byte charsets to/from UTF-8.
 
 	config NGX_WITH_HTTP_SSI_MODULE
 		bool "ssi module"
 		default n
+		---help---
+		  The ngx_http_ssi_module module is a filter that processes SSI (Server
+		  Side Includes) commands in responses passing through it. Currently,
+		  the list of supported SSI commands is incomplete.
 
 	config NGX_WITH_HTTP_USERID_MODULE
 		bool "userid module"
 		default y
+		---help---
+		  The ngx_http_userid_module module sets cookies suitable for client
+		  identification. Received and set cookies can be logged using the
+		  embedded variables $uid_got and $uid_set. This module is compatible
+		  with the mod_uid module for Apache.
 
 	config NGX_WITH_HTTP_ACCESS_MODULE
 		bool "access module"
 		default y
+		---help---
+		   The ngx_http_access_module module allows limiting access to certain
+		   client addresses.
+
+		   Access can also be limited by password, by the result of subrequest,
+		   or by JWT. Simultaneous limitation of access by address and by
+		   password is controlled by the satisfy directive.
 
 	config NGX_WITH_HTTP_AUTH_BASIC_MODULE
 		bool "auth basic module"
 		default y
+		---help---
+		   The ngx_http_auth_basic_module module allows limiting access to
+		   resources by validating the user name and password using the "HTTP
+		   Basic Authentication" protocol.
+
+		   Access can also be limited by address, by the result of subrequest,
+		   or by JWT. Simultaneous limitation of access by address and by
+		   password is controlled by the satisfy directive.
 
 	config NGX_WITH_HTTP_AUTOINDEX_MODULE
 		bool "autoindex module"
 		default y
+		---help---
+		  The ngx_http_autoindex_module module processes requests ending with
+		  the slash character (‘/’) and produces a directory listing. Usually a
+		  request is passed to the ngx_http_autoindex_module module when the
+		  ngx_http_index_module module cannot find an index file.
 
 	config NGX_WITH_HTTP_GEO_MODULE
 		bool "geo module"
 		default y
+		---help---
+		  The ngx_http_geo_module module creates variables with values
+		  depending on the client IP address.
+
+		  Example Configuration:
+
+		    geo $geo {
+		      default        0;
+
+		      127.0.0.1      2;
+		      192.168.1.0/24 1;
+		      10.1.0.0/16    1;
+
+		      ::1            2;
+		      2001:0db8::/32 1;
+		    }
 
 	config NGX_WITH_HTTP_MAP_MODULE
 		bool "map module"
 		default y
+		---help---
+		  The ngx_http_map_module module creates variables whose values depend
+		  on values of other variables.
+
+		  Example Configuration:
+
+		    map $http_host $name {
+		        hostnames;
+
+		        default       0;
+
+		        example.com   1;
+		        *.example.com 1;
+		        example.org   2;
+		        *.example.org 2;
+		        .example.net  3;
+		        wap.*         4;
+		    }
+
+		    map $http_user_agent $mobile {
+		        default       0;
+		        "~Opera Mini" 1;
+		    }
+
 
 	config NGX_WITH_HTTP_SPLIT_CLIENTS_MODULE
 		bool "split clients module"
 		default y
+		---help---
+		  The ngx_http_split_clients_module module creates variables suitable
+		  for A/B testing, also known as split testing. 
+
+		  Example configuration:
+
+		    http {
+		      split_clients "${remote_addr}AAA" $variant {
+		                     0.5%               .one;
+		                     2.0%               .two;
+		                     *                  "";
+		      }
+
+		      server {
+		        location / {
+		            index index${variant}.html;
+		        }
+		      }
+		    }
+
 
 	config NGX_WITH_HTTP_REFERER_MODULE
 		bool "referer module"
 		default y
+		---help---
+		  The ngx_http_referer_module module is used to block access to a site
+		  for requests with invalid values in the "Referer" header field. It
+		  should be kept in mind that fabricating a request with an
+		  appropriate "Referer" field value is quite easy, and so the intended
+		  purpose of this module is not to block such requests thoroughly but
+		  to block the mass flow of requests sent by regular browsers. It
+		  should also be taken into consideration that regular browsers may
+		  not send the "Referer" field even for valid requests. 
+
+		  Example configuration:
+
+		    valid_referers none blocked server_names
+		                   *.example.com example.* www.example.org/galleries/
+		                   ~\.google\.;
+
+		    if ($invalid_referer) {
+		        return 403;
+		    }
 
 	config NGX_WITH_HTTP_REWRITE_MODULE
 		bool "rewrite module"
 		default y
+		---help---
+		  The ngx_http_rewrite_module module is used to change request URI
+		  using PCRE regular expressions, return redirects, and conditionally
+		  select configurations.
 
-	config NGX_WITH_HTTP_FASTCGI_MODULE
-		bool "fastcgi module"
-		default n
+		  The ngx_http_rewrite_module module directives are processed in the
+		  following order:
 
-	config NGX_WITH_HTTP_UWSGI_MODULE
-		bool "uwsgi module"
-		default y
+		  the directives of this module specified on the server level are
+		  executed sequentially; repeatedly:
 
-	config NGX_WITH_HTTP_SCGI_MODULE
-		bool "scgi module"
-		default n
+		    * a location is searched based on a request URI;
+		    * the directives of this module specified inside the found location
+		      are executed sequentially;
+		    * the loop is repeated if a request URI was rewritten, but not more
+		      than 10 times.
+
+	menu "*CGI modules"
+		config NGX_WITH_HTTP_FASTCGI_MODULE
+			bool "fastcgi module"
+			default n
+			---help---
+			  Allows passing requests to a FastCGI server
+
+		config NGX_WITH_HTTP_UWSGI_MODULE
+			bool "uwsgi module"
+			default y
+			---help---
+			  Allows passing requests to a uwsgi server
+
+		config NGX_WITH_HTTP_SCGI_MODULE
+			bool "scgi module"
+			default n
+			---help---
+			  Allows passing requests to an SCGI server
+	endmenu #*CGI modules
 
 	config NGX_WITH_HTTP_MEMCACHED_MODULE
 		bool "memcached module"
 		default y
+		---help---
+		  The ngx_http_memcached_module module is used to obtain responses from
+		  a memcached server. The key is set in the $memcached_key variable. A
+		  response should be put in memcached in advance by means external to
+		  nginx.
+
+		  Example configuration:
+
+		    server {
+		        location / {
+		            set            $memcached_key "$uri?$args";
+		            memcached_pass host:11211;
+		            error_page     404 502 504 = @fallback;
+		        }
+
+		        location @fallback {
+		            proxy_pass     http://backend;
+		        }
+		    }
+
 
 	config NGX_WITH_HTTP_LIMIT_CONN_MODULE
 		bool "limit conn module"
 		default y
+		---help---
+		  The ngx_http_limit_conn_module module is used to limit the number of
+		  connections per the defined key, in particular, the number of
+		  connections from a single IP address.
+
+		  Not all connections are counted. A connection is counted only if it
+		  has a request processed by the server and the whole request header has
+		  already been read.
+
+		  Example configuration:
+
+		    http {
+		      limit_conn_zone $binary_remote_addr zone=addr:10m;
+
+		      ...
+
+		      server {
+		        location /download/ {
+		          limit_conn addr 1;
+		        }
+		      }
+		    }
 
 	config NGX_WITH_HTTP_LIMIT_REQ_MODULE
 		bool "limit req module"
 		default y
+		---help---
+		  The ngx_http_limit_req_module module is used to limit the request
+		  processing rate per a defined key, in particular, the processing rate
+		  of requests coming from a single IP address. The limitation is done
+		  using the "leaky bucket" method. 
+
+		  Example configuration:
+
+		    http {
+		      limit_req_zone $binary_remote_addr zone=one:10m rate=1r/s;
+
+		      ...
+
+		      server {
+		        location /search/ {
+		          limit_req zone=one burst=5;
+		        }
+		      }
+		    }
 
 	config NGX_WITH_HTTP_EMPTY_GIF_MODULE
 		bool "empty gif module"
 		default n
+		---help---
+		  Emits single-pixel transparent GIF
 
 	config NGX_WITH_HTTP_BROWSER_MODULE
 		bool "browser module"
 		default y
+		---help---
+
+
+		  The ngx_http_browser_module module creates variables whose values
+		  depend on the value of the "User-Agent" request header field:
+
+		  $modern_browser
+		    equals the value set by the modern_browser_value directive, if a
+		    browser was identified as modern;
+		  $ancient_browser
+		    equals the value set by the ancient_browser_value directive, if a
+		    browser was identified as ancient;
+		  $msie
+		    equals "1" if a browser was identified as MSIE of any version.
+
+		  Example Configuration:
+
+		  Choosing an index file:
+
+		      modern_browser_value "modern.";
+
+		      modern_browser msie      5.5;
+		      modern_browser gecko     1.0.0;
+		      modern_browser opera     9.0;
+		      modern_browser safari    413;
+		      modern_browser konqueror 3.0;
+
+		      index index.${modern_browser}html index.html;
+
+		  Redirection for old browsers:
+
+		      modern_browser msie      5.0;
+		      modern_browser gecko     0.9.1;
+		      modern_browser opera     8.0;
+		      modern_browser safari    413;
+		      modern_browser konqueror 3.0;
+
+		      modern_browser unlisted;
+
+		      ancient_browser Links Lynx netscape4;
+
+		      if ($ancient_browser) {
+		          rewrite ^ /ancient.html;
+		      }
+
 
 	menuconfig NGX_WITH_HTTP_PROXY_MODULE
 		bool "proxy module"
@@ -324,22 +625,77 @@ if NGX_WITH_HTTP
 		config NGX_WITH_HTTP_UPSTREAM_HASH_MODULE
 			bool "upsteam hash module"
 			default y
+			---help---
+			  Specifies a load balancing method for a server group where the
+			  client-server mapping is based on the hashed key value. The key
+			  can contain text, variables, and their combinations. Note that
+			  adding or removing a server from the group may result in remapping
+			  most of the keys to different servers.
+
+			  If the consistent parameter is specified the ketama consistent
+			  hashing method will be used instead. The method ensures that only
+			  a few keys will be remapped to different servers when a server is
+			  added to or removed from the group. This helps to achieve a higher
+			  cache hit ratio for caching servers.
+
+			  Syntax: hash key [consistent];
 
 		config NGX_WITH_HTTP_UPSTREAM_IP_HASH_MODULE
 			bool "upstream ip hash module"
 			default y
+			---help---
+			  Specifies that a group should use a load balancing method where
+			  requests are distributed between servers based on client IP
+			  addresses. The first three octets of the client IPv4 address, or
+			  the entire IPv6 address, are used as a hashing key. The method
+			  ensures that requests from the same client will always be passed
+			  to the same server except when this server is unavailable. In the
+			  latter case client requests will be passed to another server. Most
+			  probably, it will always be the same server as well.
+
+			  Syntax:  ip_hash;
 
 		config NGX_WITH_HTTP_UPSTREAM_LEAST_CONN_MODULE
 			bool "upstream least conn module"
 			default y
+			---help---
+			  Specifies that a group should use a load balancing method where a
+			  request is passed to the server with the least number of active
+			  connections, taking into account weights of servers. If there are
+			  several such servers, they are tried in turn using a weighted
+			  round-robin balancing method.
+
+			  Syntax:  least_conn;
 
 		config NGX_WITH_HTTP_UPSTREAM_KEEPALIVE_MODULE
 			bool "upstream keepalive module"
 			default y
+			---help---
+			  Activates the cache for connections to upstream servers.
+
+			  The connections parameter sets the maximum number of idle
+			  keepalive connections to upstream servers that are preserved in
+			  the cache of each worker process. When this number is exceeded,
+			  the least recently used connections are closed.
+
+			  It should be particularly noted that the keepalive directive does
+			  not limit the total number of connections to upstream servers
+			  that an nginx worker process can open. The connections parameter
+			  should be set to a number small enough to let upstream servers
+			  process new incoming connections as well. 
+
+			  Syntax:  keepalive connections;
 
 		config NGX_WITH_HTTP_UPSTREAM_ZONE_MODULE
 			bool "upstream zone module"
 			default y
+			---help---
+			  Defines the name and size of the shared memory zone that keeps
+			  the group’s configuration and run-time state that are shared
+			  between worker processes. Several groups may share the same zone.
+			  In this case, it is enough to specify the size only once. 
+
+			  Syntax:  zone name [size];
 
 	endif #NGX_WITH_HTTP_PROXY_MODULE
 
@@ -438,6 +794,12 @@ config NGX_MODULE_STREAM_LUA_NGINX_MODULE
 	  downstream.
 
 	  https://github.com/openresty/stream-lua-nginx-module
+
+config NGX_MODULE_NGINX_RTMP_MODULE
+	bool "nginx-rtmp-module"
+	default n
+	---help---
+	  NGINX-based Media Streaming Server
 
 config NGX_MODULE_NGX_DEVEL_KIT
 	bool "ngx_devel_kit"

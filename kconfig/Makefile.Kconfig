@@ -28,6 +28,18 @@ ifeq ($(ENABLE_IPV6), y)
 	NGX_CFG += --with-ipv6
 endif
 
+ifeq ($(NGX_WITH_SELECT), y)
+	NGX_CFG += --with-select
+else
+	NGX_CFG += --without-select
+endif
+
+ifeq ($(NGX_WITH_POLL), y)
+	NGX_CFG += --with-poll
+else
+	NGX_CFG += --without-poll
+endif
+
 ifeq ($(NGX_WITH_THREADS), y)
 	NGX_CFG += --with-threads
 endif
@@ -298,6 +310,10 @@ endif
 
 ifeq ($(NGX_MODULE_STREAM_LUA_NGINX_MODULE), y)
 	NGX_CFG += --add-module=$(DEPSDIR)/stream-lua-nginx-module
+endif
+
+ifeq ($(NGX_MODULE_NGINX_RTMP_MODULE), y)
+	NGX_CFG += --add-module=$(DEPSDIR)/nginx-rtmp-module
 endif
 
 ifeq ($(NGX_MODULE_NGX_DEVEL_KIT), y)
