@@ -89,3 +89,6 @@
 [submodule "lua-modules/pgmoon"]
 	path = lua-modules/pgmoon
 	url = https://github.com/leafo/pgmoon
+[submodule "lua-modules/lua-resty-kyototycoon"]
+	path = lua-modules/lua-resty-kyototycoon
+	url = https://github.com/cloudflare/lua-resty-kyototycoon
