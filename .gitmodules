@@ -59,3 +59,6 @@
 [submodule "dependencies/stream-lua-nginx-module"]
 	path = dependencies/stream-lua-nginx-module
 	url = https://github.com/openresty/stream-lua-nginx-module
+[submodule "dependencies/nginx-rtmp-module"]
+	path = dependencies/nginx-rtmp-module
+	url = https://github.com/arut/nginx-rtmp-module
