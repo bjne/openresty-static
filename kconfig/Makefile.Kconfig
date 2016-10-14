@@ -29,9 +29,9 @@ ifeq ($(ENABLE_IPV6), y)
 endif
 
 ifeq ($(NGX_WITH_SELECT), y)
-	NGX_CFG += --with-select
+	NGX_CFG += --with-select_module
 else
-	NGX_CFG += --without-select
+	NGX_CFG += --without-select_module
 endif
 
 ifeq ($(NGX_WITH_POLL), y)
