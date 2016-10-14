@@ -77,3 +77,6 @@
 [submodule "dependencies/headers-more-nginx-module"]
 	path = dependencies/headers-more-nginx-module
 	url = https://github.com/openresty/headers-more-nginx-module
+[submodule "dependencies/lua-upstream-nginx-module"]
+	path = dependencies/lua-upstream-nginx-module
+	url = https://github.com/openresty/lua-upstream-nginx-module

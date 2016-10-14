@@ -795,6 +795,17 @@ config NGX_MODULE_STREAM_LUA_NGINX_MODULE
 
 	  https://github.com/openresty/stream-lua-nginx-module
 
+comment "(lua-upstream-nginx-module) depends on 'lua-nginx-module'"
+	depends on !NGX_MODULE_LUA_NGINX_MODULE
+
+config NGX_MODULE_LUA_UPSTREAM_NGINX_MODULE
+	bool "lua-upstream-nginx-module"
+	default n
+	select ENABLE_LUAJIT
+	depends on NGX_MODULE_LUA_NGINX_MODULE
+	---help---
+	  Nginx C module to expose Lua API to ngx_lua for Nginx upstreams
+
 config NGX_MODULE_HEADERS_MORE_NGINX_MODULE
 	bool "headers-more-nginx-module"
 	default n
