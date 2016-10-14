@@ -795,6 +795,9 @@ config NGX_MODULE_STREAM_LUA_NGINX_MODULE
 
 	  https://github.com/openresty/stream-lua-nginx-module
 
+comment "(encrypted-session-nginx-module) depends on 'HTTP->SSL/TLS support'"
+	depends on !NGX_WITH_HTTP_SSL_MODULE
+
 config NGX_MODULE_ENCRYPTED_SESSION_NGINX_MODULE
 	bool "encrypted-session-nginx-module"
 	depends on NGX_WITH_HTTP_SSL_MODULE
