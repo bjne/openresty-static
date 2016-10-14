@@ -86,3 +86,6 @@
 [submodule "lua-modules/lua-resty-upload"]
 	path = lua-modules/lua-resty-upload
 	url = https://github.com/openresty/lua-resty-upload
+[submodule "lua-modules/pgmoon"]
+	path = lua-modules/pgmoon
+	url = https://github.com/leafo/pgmoon

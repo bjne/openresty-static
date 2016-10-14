@@ -360,46 +360,56 @@ ifeq ($(LUA_MODULE_CMSGPACK), y)
 	LUAJIT_TARGETS += lua-cmsgpack
 endif
 
+ifeq ($(LUA_MODULE_PGMOON), y)
+	LUA_MODULES += pgmoon=pgmoon.lua
+	LUA_MODULES += pgmoon=pgmoon/socket.lua
+	LUA_MODULES += pgmoon=pgmoon/init.lua
+	LUA_MODULES += pgmoon=pgmoon/json.lua
+	LUA_MODULES += pgmoon=pgmoon/arrays.lua
+	LUA_MODULES += pgmoon=pgmoon/crypto.lua
+	LUA_MODULES += pgmoon=pgmoon/hstore.lua
+endif
+
 ifeq ($(LUA_MODULE_RESTY_CORE), y)
-	LUA_MODS += lua-resty-core
+	LUA_MODS += lua-resty-core/lib
 endif
 
 ifeq ($(LUA_MODULE_RESTY_DNS), y)
-	LUA_MODS += lua-resty-dns
+	LUA_MODS += lua-resty-dns/lib
 endif
 
 ifeq ($(LUA_MODULE_RESTY_LOCK), y)
-	LUA_MODS += lua-resty-lock
+	LUA_MODS += lua-resty-lock/lib
 endif
 
 ifeq ($(LUA_MODULE_RESTY_LRUCACHE), y)
-	LUA_MODS += lua-resty-lrucache
+	LUA_MODS += lua-resty-lrucache/lib
 endif
 
 ifeq ($(LUA_MODULE_RESTY_MEMCACHED), y)
-	LUA_MODS += lua-resty-memcached
+	LUA_MODS += lua-resty-memcached/lib
 endif
 
 ifeq ($(LUA_MODULE_RESTY_MYSQL), y)
-	LUA_MODS += lua-resty-mysql
+	LUA_MODS += lua-resty-mysql/lib
 endif
 
 ifeq ($(LUA_MODULE_RESTY_REDIS), y)
-	LUA_MODS += lua-resty-redis
+	LUA_MODS += lua-resty-redis/lib
 endif
 
 ifeq ($(LUA_MODULE_RESTY_STRING), y)
-	LUA_MODS += lua-resty-string
+	LUA_MODS += lua-resty-string/lib
 endif
 
 ifeq ($(LUA_MODULE_RESTY_UPLOAD), y)
-	LUA_MODS += lua-resty-upload
+	LUA_MODS += lua-resty-upload/lib
 endif
 
 ifeq ($(LUA_MODULE_RESTY_UPSTREAM_HEALTHCHECK), y)
-	LUA_MODS += lua-resty-upstream-healthcheck
+	LUA_MODS += lua-resty-upstream-healthcheck/lib
 endif
 
 ifeq ($(LUA_MODULE_RESTY_WEBSOCKET), y)
-	LUA_MODS += lua-resty-websocket
+	LUA_MODS += lua-resty-websocket/lib
 endif

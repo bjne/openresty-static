@@ -919,6 +919,14 @@ depends on NGX_MODULE_LUA_NGINX_MODULE||NGX_MODULE_STREAM_LUA_NGINX_MODULE
 
 		  https://github.com/antirez/lua-cmsgpack
 
+	config LUA_MODULE_PGMOON
+		bool "pgmoon"
+		default n
+		---help---
+		  A pure Lua Postgres driver for use in OpenResty & more
+
+		  https://github.com/leafo/pgmoon
+
 	config LUA_MODULE_RESTY_CORE
 		bool "resty.core"
 		default y

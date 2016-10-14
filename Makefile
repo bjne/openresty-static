@@ -17,7 +17,7 @@ NGX_LD_OPTS += -Wl,-z,relro -Wl,-E
 
 include config/Makefile
 
-LUA_MODULES += $(foreach m,$(LUA_MODS),$(shell find $(MODSDIR)/$(m)/lib -name "*.lua"))
+LUA_MODULES += $(foreach m,$(LUA_MODS),$(shell find $(MODSDIR)/$(m) -name "*.lua" -printf "$(m)=%P\n"))
 
 all: nginx
 
@@ -58,12 +58,18 @@ $(BUILDDIR)/openssl/%.a:
 	$(MAKE) -C $(BUILDDIR)/openssl
 
 %.lua.build:
-	@mkdir -p $(BUILDDIR)/lua-modules
-	$(eval MODNAME=$(shell echo $*|sed 's|.*/lib/\(.*\)|\1|'|sed 's|/|_|g'))
-	@ln -sf $*.lua $(BUILDDIR)/lua-modules/$(MODNAME).lua
-	@luajit -bg $(BUILDDIR)/lua-modules/$(MODNAME).lua $(BUILDDIR)/lua-modules/$(MODNAME).lua.o
+	$(eval DIRNAME=$(shell echo $*|cut -f1 -d=))
+	$(eval LUANAME=$(shell echo $*|cut -f2 -d=).lua)
+	$(eval MODNAME=$(shell echo $(LUANAME)|sed 's|/|_|g'))
 
-lua-modules: $(foreach module,$(LUA_MODULES),$(module).build)
+	@ln -sf $(MODSDIR)/$(DIRNAME)/$(LUANAME) $(BUILDDIR)/lua-modules/$(MODNAME)
+	@luajit -bg $(BUILDDIR)/lua-modules/$(MODNAME) $(BUILDDIR)/lua-modules/$(MODNAME).o
+
+lua-modules.clean:
+	@rm -f $(BUILDDIR)/lua-modules/*
+	@mkdir -p $(BUILDDIR)/lua-modules
+
+lua-modules: lua-modules.clean $(foreach module,$(LUA_MODULES),$(module).build)
 	@ar rcus $(BUILDDIR)/lua-modules/lib$@.a $(BUILDDIR)/$@/*.o
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -l$@ -Wl,--no-whole-archive)
 
