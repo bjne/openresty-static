@@ -1027,7 +1027,16 @@ depends on NGX_MODULE_LUA_NGINX_MODULE||NGX_MODULE_STREAM_LUA_NGINX_MODULE
 		  String utilities and common hash functions for ngx_lua and LuaJIT
 
 		  https://github.com/openresty/lua-resty-string
-	
+
+	config LUA_MODULE_RESTY_UPLOAD
+		bool "resty.upload"
+		default y
+		---help---
+		  Streaming reader and parser for http file uploading based on
+		  ngx_lua cosocket
+
+		  https://github.com/openresty/lua-resty-upload
+
 	config LUA_MODULE_RESTY_UPSTREAM_HEALTHCHECK
 		bool "resty.upstream.healthcheck"
 		default y

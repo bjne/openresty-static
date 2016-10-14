@@ -83,3 +83,6 @@
 [submodule "dependencies/iconv-nginx-module"]
 	path = dependencies/iconv-nginx-module
 	url = https://github.com/calio/iconv-nginx-module
+[submodule "lua-modules/lua-resty-upload"]
+	path = lua-modules/lua-resty-upload
+	url = https://github.com/openresty/lua-resty-upload

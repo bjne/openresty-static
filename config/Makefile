@@ -392,6 +392,10 @@ ifeq ($(LUA_MODULE_RESTY_STRING), y)
 	LUA_MODS += lua-resty-string
 endif
 
+ifeq ($(LUA_MODULE_RESTY_UPLOAD), y)
+	LUA_MODS += lua-resty-upload
+endif
+
 ifeq ($(LUA_MODULE_RESTY_UPSTREAM_HEALTHCHECK), y)
 	LUA_MODS += lua-resty-upstream-healthcheck
 endif
