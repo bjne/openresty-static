@@ -1,6 +1,6 @@
 all: nginx
 
-include Makefile.inc
+include kconfig/Makefile.Kconfig
 
 DEPSDIR=$(CURDIR)/dependencies
 MODSDIR=$(CURDIR)/lua-modules
@@ -76,7 +76,8 @@ nginx: $(NGX_TARGETS) zlib-ng.src nginx.src
 	$(MAKE) -C $(BUILDDIR)/nginx
 
 %config: ;
-	 make -f scripts/kconfig/GNUmakefile TOPDIR=. SRCDIR=scripts/kconfig $@
+	@touch $(CURDIR)/.config
+	make -f kconfig/GNUmakefile TOPDIR=. SRCDIR=kconfig $@
 
 clean:
 	rm -rf $(BUILDDIR)/*
