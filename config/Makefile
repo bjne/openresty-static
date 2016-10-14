@@ -312,6 +312,10 @@ ifeq ($(NGX_MODULE_STREAM_LUA_NGINX_MODULE), y)
 	NGX_CFG += --add-module=$(DEPSDIR)/stream-lua-nginx-module
 endif
 
+ifeq ($(NGX_MODULE_ENCRYPTED_SESSION_NGINX_MODULE), y)
+	NGX_CFG += --add-module=$(DEPSDIR)/encrypted-session-nginx-module
+endif
+
 ifeq ($(NGX_MODULE_NGINX_RTMP_MODULE), y)
 	NGX_CFG += --add-module=$(DEPSDIR)/nginx-rtmp-module
 endif

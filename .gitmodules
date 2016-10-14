@@ -71,3 +71,6 @@
 [submodule "lua-modules/lua-resty-memcached"]
 	path = lua-modules/lua-resty-memcached
 	url = https://github.com/openresty/lua-resty-memcached
+[submodule "dependencies/encrypted-session-nginx-module"]
+	path = dependencies/encrypted-session-nginx-module
+	url = https://github.com/openresty/encrypted-session-nginx-module

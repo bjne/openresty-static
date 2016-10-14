@@ -795,6 +795,20 @@ config NGX_MODULE_STREAM_LUA_NGINX_MODULE
 
 	  https://github.com/openresty/stream-lua-nginx-module
 
+config NGX_MODULE_ENCRYPTED_SESSION_NGINX_MODULE
+	bool "encrypted-session-nginx-module"
+	depends on NGX_WITH_HTTP_SSL_MODULE
+	default n
+	---help---
+	  This module provides encryption and decryption support for nginx variables
+	  based on AES-256 with Mac. Module is usually used with the ngx_set_misc
+	  module and the standard rewrite module's directives.
+
+	  This module can be used to implement simple user login and ACL.
+
+	  Usually, you just decrypt data in nginx level, and pass the unencrypted
+	  data to your FastCGI/HTTP backend, as in
+
 config NGX_MODULE_NGINX_RTMP_MODULE
 	bool "nginx-rtmp-module"
 	default n
