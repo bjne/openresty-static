@@ -68,3 +68,6 @@
 [submodule "lua-modules/lua-resty-redis"]
 	path = lua-modules/lua-resty-redis
 	url = https://github.com/openresty/lua-resty-redis
+[submodule "lua-modules/lua-resty-memcached"]
+	path = lua-modules/lua-resty-memcached
+	url = https://github.com/openresty/lua-resty-memcached
