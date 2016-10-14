@@ -1,0 +1,626 @@
+mainmenu "NGiNX Configuration"
+
+config ENABLE_LUAJIT
+	def_bool n
+
+config ENABLE_ZLIB_NG
+	def_bool n
+
+config ENABLE_ZLIB
+	def_bool n
+	select ENABLE_ZLIB_NG
+
+menu "Global settings"
+	config NGX_PREFIX
+		string "Installation prefix"
+		default "/opt/nginx"
+
+	config ENABLE_SSL
+		bool "Enable SSL"
+		default y
+
+	config ENABLE_DEBUG
+		bool "Enable debug"
+		default n
+
+	config NGX_WITH_THREADS
+		bool "Enable tread pool support"
+		default n
+		---help---
+		  https://www.nginx.com/blog/thread-pools-boost-performance-9x/
+
+	config NGX_WITH_FILE_AIO
+		bool "Enable file AIO support"
+		default n
+		---help---
+		  The POSIX asynchronous I/O (AIO) interface allows applications to
+		  initiate one or more I/O operations that are performed asynchronously
+		  (i.e., in the background).  The application can elect to be notified
+		  of completion of the I/O operation in a variety of ways: by delivery
+		  of a signal, by instantiation of a thread, or no notification at all.
+
+		  see also thread pool support
+
+	config ENABLE_TCP_FASTOPEN
+		bool "Enable TCP fastopen (TFO)"
+		default y
+		---help---
+		  TCP Fast Open (TFO) is an extension to speed up the opening of
+		  successive Transmission Control Protocol (TCP) connections between two
+		  endpoints. It works by using a TFO cookie (a TCP option), which is a
+		  cryptographic cookie stored on the client and set upon the initial
+		  connection with the server.  When the client later reconnects, it
+		  sends the initial SYN packet along with the TFO cookie data to
+		  authenticate itself. If successful, the server may start sending data
+		  to the client even before the reception of the final ACK packet of the
+		  three-way handshake, skipping that way a round-trip delay and lowering
+		  the latency in the start of data transmission.
+
+		  see fastopen=number listen option
+
+	config ENABLE_IPV6
+		bool "Enable IPv6"
+		default y
+
+	menuconfig NGX_WITH_PCRE
+		bool "Enable PCRE"
+		default y
+	
+	if NGX_WITH_PCRE
+		config NGX_WITH_PCRE_JIT
+			bool "Enable PCRE JIT compilation"
+			default y
+			depends on NGX_WITH_PCRE
+	endif #NGX_WITH_PCRE
+endmenu
+
+menuconfig NGX_WITH_HTTP
+	bool "HTTP"
+	default y
+
+if NGX_WITH_HTTP
+	config NGX_WITH_HTTP_SSL_MODULE
+		bool "SSL/TLS support"
+		default n
+
+	config NGX_WITH_HTTP_V2_MODULE
+		bool "v2 support"
+		default n
+
+	menuconfig NGX_WITH_HTTP_CACHE
+		bool "cache support"
+		default y
+
+	if NGX_WITH_HTTP_CACHE
+		config NGX_WITH_HTTP_SLICE_MODULE
+			bool "slice module"
+			default n
+	endif #NGX_WITH_HTTP_CACHE
+
+	config NGX_WITH_HTTP_REALIP_MODULE
+		bool "realip module"
+		default n
+		---help---
+		  The ngx_http_realip_module module is used to change the client address
+		  and optional port to the one sent in the specified header fields.
+
+	config NGX_WITH_HTTP_ADDITION_MODULE
+		bool "addition module"
+		default n
+		---help---
+		  The ngx_http_addition_module module is a filter that adds text before
+		  and after a response.
+
+	config NGX_WITH_HTTP_XSLT_MODULE
+		bool "xslt module"
+		default n
+		---help---
+		  The ngx_http_xslt_module is a filter that transforms XML responses
+		  using one or more XSLT stylesheets.
+
+	config NGX_WITH_HTTP_IMAGE_FILTER_MODULE
+		bool "image filter module"
+		default n
+		---help---
+		  The ngx_http_image_filter_module module is a filter that transforms
+		  images in JPEG, GIF, and PNG formats.
+
+	config NGX_WITH_HTTP_GEOIP_MODULE
+		bool "geoip module"
+		default n
+		---help---
+		   The ngx_http_geoip_module module creates variables with values
+		   depending on the client IP address, using the precompiled MaxMind
+		   databases.
+
+		   When using the databases with IPv6 support (1.3.12, 1.2.7), IPv4
+		   addresses are looked up as IPv4-mapped IPv6 addresses.
+
+	config NGX_WITH_HTTP_SUB_MODULE
+		bool "sub module"
+		default n
+		---help---
+		  The ngx_http_sub_module module is a filter that modifies a response by
+		  replacing one specified string by another.
+
+	config NGX_WITH_HTTP_DAV_MODULE
+		bool "webdav module"
+		default n
+		---help---
+		  The ngx_http_dav_module module is intended for file management
+		  automation via the WebDAV protocol. The module processes HTTP and
+		  WebDAV methods PUT, DELETE, MKCOL, COPY, and MOVE.
+
+	menuconfig _NGX_WITH_VIDEO
+		bool "video related modules"
+		default n
+
+	if _NGX_WITH_VIDEO
+		config NGX_WITH_HTTP_FLV_MODULE
+			bool "flv module"
+			default n
+			---help---
+			The ngx_http_flv_module module provides pseudo-streaming server-side
+			support for Flash Video (FLV) files.
+
+			It handles requests with the start argument in the request URI’s
+			query string specially, by sending back the contents of a file
+			starting from the requested byte offset and with the prepended FLV
+			header.
+
+		config NGX_WITH_HTTP_MP4_MODULE
+			bool "mp4 module"
+			default n
+			---help---
+			  The ngx_http_mp4_module module provides pseudo-streaming
+			  server-side support for MP4 files. Such files typically have the
+			  .mp4, .m4v, or .m4a filename extensions.
+
+			  Pseudo-streaming works in alliance with a compatible Flash player.
+			  The player sends an HTTP request to the server with the start time
+			  specified in the query string argument (named simply start and
+			  specified in seconds), and the server responds with the stream
+			  such that its start position corresponds to the requested time,
+			  for example:
+
+			     http://example.com/elephants_dream.mp4?start=238.88
+
+			  This allows performing a random seeking at any time, or starting
+			  playback in the middle of the timeline.
+	endif #_NGX_WITH_VIDEO
+
+	config NGX_WITH_HTTP_AUTH_REQUEST_MODULE
+		bool "auth request module"
+		default n
+		---help---
+		  The ngx_http_auth_request_module module implements client
+		  authorization based on the result of a subrequest. If the subrequest
+		  returns a 2xx response code, the access is allowed. If it returns 401
+		  or 403, the access is denied with the corresponding error code. Any
+		  other response code returned by the subrequest is considered an error.
+
+		  For the 401 error, the client also receives the “WWW-Authenticate”
+		  header from the subrequest response. 
+
+	menuconfig _NGX_WITH_COMPRESSION
+		bool "compression support"
+		default y
+
+	if _NGX_WITH_COMPRESSION
+		config NGX_WITH_HTTP_GZIP_MODULE
+			bool "gzip module"
+			select ENABLE_ZLIB
+			default y
+
+		config NGX_WITH_HTTP_GUNZIP_MODULE
+			bool "gunzip module"
+			select ENABLE_ZLIB
+			default n
+
+		config NGX_WITH_HTTP_GZIP_STATIC_MODULE
+			bool "gzip static module"
+			select ENABLE_ZLIB
+			default n
+	endif #_NGX_WITH_COMPRESSION
+
+	config NGX_WITH_HTTP_RANDOM_INDEX_MODULE
+		bool "random index module"
+		default n
+
+	config NGX_WITH_HTTP_SECURE_LINK_MODULE
+		bool "secure link module"
+		default n
+
+	config NGX_WITH_HTTP_DEGRADATION_MODULE
+		bool "degradation module"
+		default n
+
+	config NGX_WITH_HTTP_STUB_STATUS_MODULE
+		bool "stub status module"
+		default n
+
+	config NGX_WITH_HTTP_CHARSET_MODULE
+		bool "charset module"
+		default y
+
+	config NGX_WITH_HTTP_SSI_MODULE
+		bool "ssi module"
+		default n
+
+	config NGX_WITH_HTTP_USERID_MODULE
+		bool "userid module"
+		default y
+
+	config NGX_WITH_HTTP_ACCESS_MODULE
+		bool "access module"
+		default y
+
+	config NGX_WITH_HTTP_AUTH_BASIC_MODULE
+		bool "auth basic module"
+		default y
+
+	config NGX_WITH_HTTP_AUTOINDEX_MODULE
+		bool "autoindex module"
+		default y
+
+	config NGX_WITH_HTTP_GEO_MODULE
+		bool "geo module"
+		default y
+
+	config NGX_WITH_HTTP_MAP_MODULE
+		bool "map module"
+		default y
+
+	config NGX_WITH_HTTP_SPLIT_CLIENTS_MODULE
+		bool "split clients module"
+		default y
+
+	config NGX_WITH_HTTP_REFERER_MODULE
+		bool "referer module"
+		default y
+
+	config NGX_WITH_HTTP_REWRITE_MODULE
+		bool "rewrite module"
+		default y
+
+	config NGX_WITH_HTTP_FASTCGI_MODULE
+		bool "fastcgi module"
+		default n
+
+	config NGX_WITH_HTTP_UWSGI_MODULE
+		bool "uwsgi module"
+		default y
+
+	config NGX_WITH_HTTP_SCGI_MODULE
+		bool "scgi module"
+		default n
+
+	config NGX_WITH_HTTP_MEMCACHED_MODULE
+		bool "memcached module"
+		default y
+
+	config NGX_WITH_HTTP_LIMIT_CONN_MODULE
+		bool "limit conn module"
+		default y
+
+	config NGX_WITH_HTTP_LIMIT_REQ_MODULE
+		bool "limit req module"
+		default y
+
+	config NGX_WITH_HTTP_EMPTY_GIF_MODULE
+		bool "empty gif module"
+		default n
+
+	config NGX_WITH_HTTP_BROWSER_MODULE
+		bool "browser module"
+		default y
+
+	menuconfig NGX_WITH_HTTP_PROXY_MODULE
+		bool "proxy module"
+		default y
+
+	if NGX_WITH_HTTP_PROXY_MODULE
+
+		config NGX_WITH_HTTP_UPSTREAM_HASH_MODULE
+			bool "upsteam hash module"
+			default y
+
+		config NGX_WITH_HTTP_UPSTREAM_IP_HASH_MODULE
+			bool "upstream ip hash module"
+			default y
+
+		config NGX_WITH_HTTP_UPSTREAM_LEAST_CONN_MODULE
+			bool "upstream least conn module"
+			default y
+
+		config NGX_WITH_HTTP_UPSTREAM_KEEPALIVE_MODULE
+			bool "upstream keepalive module"
+			default y
+
+		config NGX_WITH_HTTP_UPSTREAM_ZONE_MODULE
+			bool "upstream zone module"
+			default y
+
+	endif #NGX_WITH_HTTP_PROXY_MODULE
+
+endif #HTTP
+
+menuconfig NGX_WITH_STREAM
+	bool "STREAM"
+	default n
+
+if NGX_WITH_STREAM
+	comment "(SSL TCP/UDP proxy module) depends on 'Enable SSL'"
+		depends on !ENABLE_SSL
+
+	config NGX_WITH_STREAM_SSL_MODULE
+		bool "SSL TCP/UDP proxy module"
+		default y
+		depends on ENABLE_SSL
+
+	config NGX_WITH_STREAM_REALIP_MODULE
+		bool "realip module"
+		default n
+
+	config NGX_WITH_STREAM_GEOIP_MODULE
+		bool "geoip module"
+		default n
+
+	comment "(ssl preload module) depends on 'SSL TCP/UDP proxy module'"
+		depends on !NGX_WITH_STREAM_SSL_MODULE¬
+
+	config NGX_WITH_STREAM_SSL_PRELOAD_MODULE
+		bool "ssl preload module"
+		default n
+		depends on NGX_WITH_STREAM_SSL_MODULE
+
+	config NGX_WITH_STREAM_LIMIT_CONN_MODULE
+		bool "limit conn module"
+		default y
+
+	config NGX_WITH_STREAM_ACCESS_MODULE
+		bool "access module"
+		default y
+
+	config NGX_WITH_STREAM_GEO_MODULE
+		bool "geo module"
+		default y
+
+	config NGX_WITH_STREAM_MAP_MODULE
+		bool "map module"
+		default y
+
+	config NGX_WITH_STREAM_SPLIT_CLIENTS_MODULE
+		bool "split clients module"
+		default y
+
+	config NGX_WITH_STREAM_RETURN_MODULE
+		bool "return module"
+		default y
+
+	config NGX_WITH_STREAM_UPSTREAM_HASH_MODULE
+		bool "upstream hash module"
+		default y
+
+	config NGX_WITH_STREAM_UPSTREAM_LEAST_CONN_MODULE
+		bool "upstream least conn module"
+		default y
+
+	config NGX_WITH_STREAM_UPSTREAM_ZONE_MODULE
+		bool "upstream zone module"
+		default y
+
+endif #NGX_WITH_STREAM
+
+menu "External modules"
+config NGX_MODULE_LUA_NGINX_MODULE
+	bool "lua-nginx-module"
+	select ENABLE_LUAJIT
+	select NGX_MODULE_NGX_DEVEL_KIT
+	select NGX_MODULE_SET_MISC_NGINX_MODULE
+	default y
+	---help---
+	  Embed the Power of Lua into NGINX HTTP servers
+
+	  https://github.com/openresty/lua-nginx-module
+
+config NGX_MODULE_STREAM_LUA_NGINX_MODULE
+	bool "stream-lua-nginx-module"
+	select ENABLE_LUAJIT
+	select NGX_WITH_STREAM
+	select NGX_WITH_STREAM_SSL_MODULE if ENABLE_SSL
+	default n
+	---help---
+	  Embed the power of Lua into Nginx stream/TCP Servers
+
+	  This is a port of the ngx_http_lua_module to the NGINX "stream"
+	  subsystem so as to support generic stream/TCP clients in the
+	  downstream.
+
+	  https://github.com/openresty/stream-lua-nginx-module
+
+config NGX_MODULE_NGX_DEVEL_KIT
+	bool "ngx_devel_kit"
+	default y
+	---help---
+	  The NDK is an Nginx module that is designed to extend the core
+	  functionality of the excellent Nginx webserver in a way that can
+	  be used as a basis of other Nginx modules.
+
+	  It has functions and macros to deal with generic tasks that don't
+	  currently have generic code as part of the core distribution.
+	  The NDK itself adds few features that are seen from a user's point
+	  of view - it's just designed to help reduce the code that Nginx
+	  module developers need to write.
+
+	  The following 3rd-party modules make use of NDK
+	    ngx_http_lua_module
+	    ngx_http_set_misc_module
+	    ngx_http_encrypted_session_module
+	    ngx_http_form_input_module
+	    ngx_http_iconv_module
+	    ngx_http_array_var_module
+
+	  https://github.com/simpl/ngx_devel_kit
+
+comment "(set-misc-nginx-module) depends on 'ngx_devel_kit'"
+	depends on !NGX_MODULE_NGX_DEVEL_KIT
+
+config NGX_MODULE_SET_MISC_NGINX_MODULE
+	bool "set-misc-nginx-module"
+	default y
+	depends on NGX_MODULE_NGX_DEVEL_KIT
+	---help---
+	  Various set_xxx directives added to nginx's rewrite module
+	  (md5/sha1, sql/json quoting, and many more)
+
+	  https://github.com/openresty/set-misc-nginx-module
+
+config NGX_MODULE_NGX_COOLKIT
+	bool "ngx_coolkit"
+	default y
+	---help---
+	  ngx_coolkit is collection of small and useful nginx add-ons.
+
+	  https://github.com/FRiCKLE/ngx_coolkit
+
+config NGX_MODULE_ECHO_NGINX_MODULE
+	bool "echo-nginx-module"
+	default y
+	---help---
+	  Brings "echo", "sleep", "time", "exec" and more shell-style
+	  goodies to Nginx config file
+
+	  https://github.com/openresty/echo-nginx-module
+
+endmenu
+
+comment "(LUA modules) depends on 'lua-nginx-module' or 'stream-lua-nginx-module'"
+	depends on !NGX_MODULE_LUA_NGINX_MODULE
+	depends on !NGX_MODULE_STREAM_LUA_NGINX_MODULE
+
+menu "LUA modules"
+depends on NGX_MODULE_LUA_NGINX_MODULE||NGX_MODULE_STREAM_LUA_NGINX_MODULE
+	config LUA_MODULE_CJSON
+		bool "cjson"
+		default y
+		---help---
+		  Lua CJSON is a fast JSON encoding/parsing module for Lua
+
+		  https://github.com/openresty/lua-cjson
+
+	config LUA_MODULE_CMSGPACK
+		bool "cmsgpack"
+		default y
+		---help---
+		  A self contained Lua MessagePack C implementation
+
+		  https://github.com/antirez/lua-cmsgpack
+
+	config LUA_MODULE_RESTY_CORE
+		bool "resty.core"
+		default y
+		select LUA_MODULE_RESTY_LRUCACHE
+		---help---
+		  New FFI-based API for lua-nginx-module
+
+		  This pure Lua library reimplements part of the ngx_lua module's
+		  Nginx API for Lua with LuaJIT FFI and installs the new FFI-based
+		  Lua API into the ngx.* and ndk.* namespaces used by the ngx_lua
+		  module.
+
+		  In addition, this Lua library implements any significant new Lua
+		  APIs of the ngx_lua module as proper Lua modules, like ngx.semaphore
+		  and ngx.balancer.
+
+		  The FFI-based Lua API can work with LuaJIT's JIT compiler.
+		  ngx_lua's default API is based on the standard Lua C API, which will
+		  never be JIT compiled and the user Lua code is always interpreted
+		  (slowly).
+
+		  https://github.com/openresty/lua-resty-core
+
+	config LUA_MODULE_RESTY_DNS
+		bool "resty.dns"
+		default y
+		---help---
+		  Lua DNS resolver for the ngx_lua based on the cosocket API
+
+		  https://github.com/openresty/lua-resty-dns
+
+	config LUA_MODULE_RESTY_LOCK
+		bool "resty.lock"
+		default y
+		---help---
+		   Simple nonblocking lock API for ngx_lua based on SHM dictionaries
+
+		   https://github.com/openresty/lua-resty-lock
+
+	config LUA_MODULE_RESTY_LRUCACHE
+		bool "resty.lrucache"
+		default y
+		---help---
+		  Lua-land LRU Cache based on LuaJIT FFI
+
+		  This cache also supports expiration time.
+
+		  The LRU cache resides completely in the Lua VM and is subject to
+		  Lua GC. So do not expect it to get shared across the OS process
+		  boundary. The upside is that you can cache arbitrary complex Lua
+		  values (like deep nested Lua tables) without the overhead of
+		  serialization (as with ngx_lua's shared dictionary API).
+		  The downside is that your cache is always limited to the current OS
+		  process (like the current nginx worker process). It does not really
+		  make much sense to use this library in the context of init_by_lua
+		  because the cache will not get shared by any of the worker processes
+		  (unless you just want to "warm up" the cache with predefined items
+		  which will get inherited by the workers via fork).
+
+		  There are two different implementations included in this library, in
+		  the form of two classes: resty.lrucache and resty.lrucache.pureffi.
+		  They share exactly the same API. The only difference is that the
+		  latter is a pure FFI implementation that also implements an FFI-based
+		  hash table for the cache lookup while the former uses native Lua
+		  tables for it.
+
+		  If the cache hit rate is relatively high, you should use the
+		  resty.lrucache class which is faster than resty.lrucache.pureffi.
+
+		  But if the cache hit rate is relatively low and there can be a lot of
+		  variations of keys inserted into and removed from the cache, then you
+		  should use the resty.lrucache.pureffi instead, because Lua tables are
+		  not good at removing keys frequently by design and you would see the
+		  resizetab function call in the LuaJIT runtime being very hot in on-CPU
+		  flame graphs if you use the resty.lrucache class instead of
+		  resty.lrucache.pureffi in this use case.
+
+		  https://github.com/openresty/lua-resty-lrucache
+
+	comment "(resty.string) depends on 'Enable SSL'"
+		depends on !ENABLE_SSL
+
+	config LUA_MODULE_RESTY_STRING
+		bool "resty.string"
+		default y
+		depends on ENABLE_SSL
+		---help---
+		  String utilities and common hash functions for ngx_lua and LuaJIT
+
+		  https://github.com/openresty/lua-resty-string
+	
+	config LUA_MODULE_RESTY_UPSTREAM_HEALTHCHECK
+		bool "resty.upstream.healthcheck"
+		default y
+		---help---
+		  Health-checker for Nginx upstream servers
+
+		  https://github.com/openresty/lua-resty-upstream-healthcheck
+
+	config LUA_MODULE_RESTY_WEBSOCKET
+		bool "resty.websocket"
+		default y
+		---help---
+		  WebSocket support for the ngx_lua module
+
+		  https://github.com/openresty/lua-resty-websocket
+endmenu

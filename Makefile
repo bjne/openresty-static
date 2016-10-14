@@ -1,51 +1,26 @@
 all: nginx
 
+include Makefile.inc
+
 DEPSDIR=$(CURDIR)/dependencies
+MODSDIR=$(CURDIR)/lua-modules
+
 BUILDDIR=$(CURDIR)/build
 PATCHDIR=$(CURDIR)/patches
-MODSDIR=$(CURDIR)/lua-modules
 
 LUADIR=$(BUILDDIR)/luajit/src
 
 export LUAJIT_LIB=$(LUADIR)
 export LUAJIT_INC=$(LUADIR)
 
-LUAJIT_CFLAGS += -DLUAJIT_CJSON
-LUAJIT_CFLAGS += -DLUAJIT_CMSGPACK
+NGX_CC_OPTS += -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2
+NGX_CC_OPTS += -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4
+NGX_CC_OPTS += -grecord-gcc-switches -m64 -mtune=generic
 
-NGINX_CC_OPTS += -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2
-NGINX_CC_OPTS += -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4
-NGINX_CC_OPTS += -grecord-gcc-switches -m64 -mtune=generic
-NGINX_CC_OPTS += -DTCP_FASTOPEN=23
+NGX_LD_OPTS += -L$(LUADIR) -lluajit-5.1
+NGX_LD_OPTS += -Wl,-z,relro -Wl,-E
 
-NGINX_LD_OPTS += -L$(LUADIR) -lluajit-5.1
-NGINX_LD_OPTS += -Wl,-z,relro -Wl,-E
-
-LUA_MODULES = $(shell find $(MODSDIR)/*/lib -name "*.lua" -type f)
-
-NGINX_CONF_OPTS += \
-	--prefix=/opt/nginx \
-	--with-ipv6 \
-	--with-http_slice_module \
-	--with-http_stub_status_module \
-	--with-http_realip_module \
-	--with-http_auth_request_module \
-	--add-module=$(DEPSDIR)/ngx_devel_kit \
-	--add-module=$(DEPSDIR)/ngx_coolkit \
-	--add-module=$(DEPSDIR)/set-misc-nginx-module \
-	--add-module=$(DEPSDIR)/echo-nginx-module \
-	--add-module=$(DEPSDIR)/lua-nginx-module \
-	--with-pcre=$(BUILDDIR)/pcre \
-	--with-pcre-jit \
-	--with-http_gzip_static_module \
-	--with-http_ssl_module \
-	--without-http_gzip_module \
-	--with-zlib=$(BUILDDIR)/zlib-ng \
-	--with-zlib-opt='-msse4.2 -mpclmul -O3 -static' \
-	--with-md5=$(BUILDDIR)/openssl \
-	--with-sha1=$(BUILDDIR)/openssl \
-	--with-md5-asm \
-	--with-sha1-asm
+LUA_MODULES += $(foreach m,$(LUA_MODS),$(shell find $(MODSDIR)/$(m)/lib -name "*.lua"))
 
 %.src:
 	@$(MAKE) $*.tar
@@ -59,36 +34,29 @@ NGINX_CONF_OPTS += \
 %.patch:
 	@cat $(PATCHDIR)/$*/* 2>/dev/null|patch -p1 -d $(BUILDDIR)/$*
 
-luajit: luajit.src
+luajit: luajit.src $(LUAJIT_TARGETS)
 	@CFLAGS="$(LUAJIT_CFLAGS)" make -C $(BUILDDIR)/luajit/src libluajit.a
-	@cd $(BUILDDIR)/luajit/src ; ln -sf libluajit.a libluajit-5.1.a
+	@ln -sf $(BUILDDIR)/libluajit.a $(BUILDDIR)/libluajit-5.1.a
 
 lua-cjson: luajit.src lua-cjson.src
 	@OBJS="lua_cjson.o strbuf.o fpconv.o"
 	@LUA_INCLUDE_DIR=$(LUADIR) $(MAKE) -C $(BUILDDIR)/$@ $(OBJS)
 	@ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
-	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
+	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
 lua-cmsgpack: luajit.src lua-cmsgpack.src
 	@mkdir -p $(BUILDDIR)/$@
 	@cd $(BUILDDIR)/$@ ; gcc -I$(LUADIR) -O2 -Wall -std=c99 lua_cmsgpack.c -c
 	@ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
-	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
+	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
 openssl: openssl.src $(BUILDDIR)/openssl/libssl.a $(BUILDDIR)/openssl/libcrypto.a
-	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive -ldl)
-	$(eval NGINX_CC_OPTS += -I$(BUILDDIR)/$@/include)
+	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive -ldl)
+	$(eval NGX_CC_OPTS += -I$(BUILDDIR)/$@/include)
 
 $(BUILDDIR)/openssl/%.a:
-	cd $(BUILDDIR)/openssl && ./config no-shared $(OPENSSL_OPTS)
+	cd $(BUILDDIR)/openssl && ./config no-shared $(OPENSSL)
 	$(MAKE) -C $(BUILDDIR)/openssl
-
-nginx: luajit lua-cjson lua-cmsgpack pcre.src openssl.src zlib-ng.src lua-modules openssl nginx.src
-	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGINX_CONF_OPTS) \
-		--with-cc-opt='$(NGINX_CC_OPTS)' \
-		--with-ld-opt='$(NGINX_LD_OPTS)'
-
-	$(MAKE) -C $(BUILDDIR)/nginx
 
 %.lua.build:
 	@mkdir -p $(BUILDDIR)/lua-modules
@@ -98,7 +66,19 @@ nginx: luajit lua-cjson lua-cmsgpack pcre.src openssl.src zlib-ng.src lua-module
 
 lua-modules: $(foreach module,$(LUA_MODULES),$(module).build)
 	@ar rcus $(BUILDDIR)/lua-modules/lib$@.a $(BUILDDIR)/$@/*.o
-	$(eval NGINX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -l$@ -Wl,--no-whole-archive)
+	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -l$@ -Wl,--no-whole-archive)
+
+nginx: $(NGX_TARGETS) zlib-ng.src nginx.src
+	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGX_CFG) \
+		--with-cc-opt='$(NGX_CC_OPTS)' \
+		--with-ld-opt='$(NGX_LD_OPTS)'
+
+	$(MAKE) -C $(BUILDDIR)/nginx
+
+%config: ;
+	 make -f scripts/kconfig/GNUmakefile TOPDIR=. SRCDIR=scripts/kconfig $@
 
 clean:
 	rm -rf $(BUILDDIR)/*
+
+# vim: ts=4 ai
