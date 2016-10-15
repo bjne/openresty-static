@@ -1,6 +1,6 @@
 --- luajit.old/src/lib_init.c	2016-10-12 23:25:51.604022360 +0200
 +++ luajit/src/lib_init.c	2016-10-12 23:25:16.552481454 +0200
-@@ -15,6 +15,16 @@
+@@ -15,6 +15,20 @@
  
  #include "lj_arch.h"
  
@@ -14,10 +14,14 @@
 +LUALIB_API int luaopen_cmsgpack_safe(lua_State *l);
 +#endif
 +
++#ifdef LUAJIT_UCL
++LUALIB_API int luaopen_ucl(lua_State *l);
++#endif
++
  static const luaL_Reg lj_lib_load[] = {
    { "",			luaopen_base },
    { LUA_LOADLIBNAME,	luaopen_package },
-@@ -33,6 +43,14 @@
+@@ -33,6 +43,17 @@
  #if LJ_HASFFI
    { LUA_FFILIBNAME,	luaopen_ffi },
  #endif
@@ -28,6 +32,9 @@
 +#ifdef LUAJIT_CMSGPACK
 +  { "cmsgpack",		luaopen_cmsgpack},
 +  { "cmsgpack.safe",	luaopen_cmsgpack_safe },
++#endif
++#ifdef LUAJIT_UCL
++  { "ucl",				luaopen_ucl},
 +#endif
    { NULL,		NULL }
  };

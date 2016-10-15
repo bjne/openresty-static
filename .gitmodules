@@ -98,3 +98,6 @@
 [submodule "lua-modules/lua-resty-kafka"]
 	path = lua-modules/lua-resty-kafka
 	url = https://github.com/doujiang24/lua-resty-kafka
+[submodule "dependencies/libucl"]
+	path = dependencies/libucl
+	url = https://github.com/vstakhov/libucl

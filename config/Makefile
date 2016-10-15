@@ -360,6 +360,11 @@ ifeq ($(LUA_MODULE_CMSGPACK), y)
 	LUAJIT_TARGETS += lua-cmsgpack
 endif
 
+ifeq ($(LUA_MODULE_UCL), y)
+	LUAJIT_CFLAGS += -DLUAJIT_UCL
+	LUAJIT_TARGETS += libucl
+endif
+
 ifeq ($(LUA_MODULE_PGMOON), y)
 	LUA_MODULES += pgmoon=pgmoon.lua
 	LUA_MODULES += pgmoon=pgmoon/socket.lua

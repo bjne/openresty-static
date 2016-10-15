@@ -919,6 +919,25 @@ depends on NGX_MODULE_LUA_NGINX_MODULE||NGX_MODULE_STREAM_LUA_NGINX_MODULE
 
 		  https://github.com/antirez/lua-cmsgpack
 
+	config LUA_MODULE_UCL
+		bool "ucl"
+		default n
+		---help---
+		  Configuration language called UCL - universal configuration language.
+
+		  UCL allows validation of objects. It uses the same schema that is used
+		  for json: json schema v4. UCL supports the full set of json schema
+		  with the exception of remote references. This feature is unlikely
+		  useful for configuration objects. Of course, a schema definition can
+		  be in UCL format instead of JSON that simplifies schemas writing.
+		  Moreover, since UCL supports multiple values for keys in an object
+		  it is possible to specify generic integer constraints maxValues and
+		  minValues to define the limits of values count in a single key. UCL
+		  currently is not absolutely strict about validation schemas
+		  themselves, therefore UCL users should supply valid schemas (as it
+		  is defined in json-schema draft v4) to ensure that the input objects
+		  are validated properly.
+
 	config LUA_MODULE_PGMOON
 		bool "pgmoon"
 		default n
@@ -1083,3 +1102,5 @@ depends on NGX_MODULE_LUA_NGINX_MODULE||NGX_MODULE_STREAM_LUA_NGINX_MODULE
 
 		  https://github.com/openresty/lua-resty-websocket
 endmenu
+
+# vim: set ts=4 ai textwidth=80

@@ -14,6 +14,7 @@ NGX_CC_OPTS += -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4
 NGX_CC_OPTS += -grecord-gcc-switches -m64 -mtune=generic
 
 NGX_LD_OPTS += -Wl,-z,relro -Wl,-E
+NGX_LD_OPTS += -L$(LUADIR)
 
 include config/Makefile
 
@@ -44,10 +45,21 @@ lua-cjson: luajit.src lua-cjson.src
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
 lua-cmsgpack: luajit.src lua-cmsgpack.src
-	@mkdir -p $(BUILDDIR)/$@
 	@cd $(BUILDDIR)/$@ ; gcc -I$(LUADIR) -O2 -Wall -std=c99 lua_cmsgpack.c -c
 	@ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
+
+libucl: luajit.src libucl.src
+	@rm -f $(BUILDDIR)/$@/src/libucl.la
+	@test -f $(BUILDDIR)/$@/configure || (cd $(BUILDDIR)/$@ ; ./autogen.sh)
+	@test -f $(BUILDDIR)/$@/Makefile || (cd $(BUILDDIR)/$@ ; \
+		./configure --enable-static --enable-regex)
+	@$(MAKE) -C $(BUILDDIR)/$@/src libucl.la
+	@cd $(BUILDDIR)/$@/lua ; \
+		gcc -O3 -Wall -I../include -I../src -I../uthash -I$(LUADIR) lua_ucl.c -c
+	@ar rs $(BUILDDIR)/$@/src/.libs/libucl.a $(BUILDDIR)/$@/lua/lua_ucl.o
+	@mv $(BUILDDIR)/$@/src/.libs/libucl.a $(BUILDDIR)/$@/liblua-ucl.a
+	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -llua-ucl)
 
 openssl: openssl.src $(BUILDDIR)/openssl/libssl.a $(BUILDDIR)/openssl/libcrypto.a
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive -ldl)
