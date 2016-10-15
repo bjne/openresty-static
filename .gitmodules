@@ -101,3 +101,6 @@
 [submodule "dependencies/libucl"]
 	path = lua-modules/libucl
 	url = https://github.com/vstakhov/libucl
+[submodule "dependencies/rumprun"]
+	path = dependencies/rumprun
+	url = https://github.com/rumpkernel/rumprun
