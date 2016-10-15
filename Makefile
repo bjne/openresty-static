@@ -1,5 +1,6 @@
 DEPSDIR=$(CURDIR)/dependencies
-MODSDIR=$(CURDIR)/lua-modules
+LUA_MODSDIR=$(CURDIR)/lua-modules
+NGX_MODSDIR=$(CURDIR)/ngx-modules
 
 BUILDDIR=$(CURDIR)/build
 PATCHDIR=$(CURDIR)/patches
@@ -27,29 +28,30 @@ all: nginx
 %.src: %.patch ;
 
 %.patch: %.tar
-	@cat $(PATCHDIR)/$*/* 2>/dev/null|patch -p1 -d $(BUILDDIR)/$*
+	$(eval M = $(shell basename $*))
+	@cat $(PATCHDIR)/$(M)/* 2>/dev/null|patch -p1 -d $(BUILDDIR)/$(M)
 
-%.tar: $(DEPSDIR)/%.submodule
+%.tar: %.submodule
+	$(eval M = $(shell basename $*))
 	@mkdir -p $(BUILDDIR)
-	@cd $(DEPSDIR)/$* ; \
-		git archive --format tar --prefix $*/ HEAD | tar x -C $(BUILDDIR)
+	@cd $* ; git archive --format tar --prefix $(M)/ HEAD | tar x -C $(BUILDDIR)
 
-luajit: luajit.src $(LUAJIT_TARGETS)
+luajit: dependencies/luajit.src $(LUAJIT_TARGETS)
 	@CFLAGS="$(LUAJIT_CFLAGS)" make -C $(LUADIR) libluajit.a
 	@ln -sf $(LUADIR)/libluajit.a $(LUADIR)/libluajit-5.1.a
 
-lua-cjson: luajit.src lua-cjson.src
+lua-cjson: dependencies/luajit.src lua-modules/lua-cjson.src
 	@OBJS="lua_cjson.o strbuf.o fpconv.o"
 	@LUA_INCLUDE_DIR=$(LUADIR) $(MAKE) -C $(BUILDDIR)/$@ $(OBJS)
 	@ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
-lua-cmsgpack: luajit.src lua-cmsgpack.src
+lua-cmsgpack: dependencies/luajit.src lua-modules/lua-cmsgpack.src
 	@cd $(BUILDDIR)/$@ ; gcc -I$(LUADIR) -O2 -Wall -std=c99 lua_cmsgpack.c -c
 	@ar rcus $(BUILDDIR)/$@/lib$@.a $(BUILDDIR)/$@/*.o
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -l$@)
 
-libucl: luajit.src libucl.src
+libucl: dependencies/luajit.src lua-modules/libucl.src
 	@rm -f $(BUILDDIR)/$@/src/libucl.la
 	@test -f $(BUILDDIR)/$@/configure || (cd $(BUILDDIR)/$@ ; ./autogen.sh)
 	@test -f $(BUILDDIR)/$@/Makefile || (cd $(BUILDDIR)/$@ ; \
@@ -61,7 +63,7 @@ libucl: luajit.src libucl.src
 	@mv $(BUILDDIR)/$@/src/.libs/libucl.a $(BUILDDIR)/$@/liblua-ucl.a
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -llua-ucl)
 
-openssl: openssl.src $(BUILDDIR)/openssl/libssl.a $(BUILDDIR)/openssl/libcrypto.a
+openssl: dependencies/openssl.src $(BUILDDIR)/openssl/libssl.a $(BUILDDIR)/openssl/libcrypto.a
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ \
 		-Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive -ldl)
 	$(eval NGX_CC_OPTS += -I$(BUILDDIR)/$@/include)
@@ -75,7 +77,7 @@ $(BUILDDIR)/openssl/%.a:
 	$(eval L=$(shell echo $*|cut -f2 -d=).lua)
 	$(eval M=$(shell echo $(L)|sed 's|/|_|g'))
 
-	@ln -sf $(MODSDIR)/$(D)/$(L) $(BUILDDIR)/lua-modules/$(M)
+	@ln -sf $(LUA_MODSDIR)/$(D)/$(L) $(BUILDDIR)/lua-modules/$(M)
 	@luajit -bg $(BUILDDIR)/lua-modules/$(M) $(BUILDDIR)/lua-modules/$(M).o
 
 lua-mods: $(foreach m,$(LUA_MODS),lua-modules/$(shell echo $(m)|cut -f1 -d/).submodule)
@@ -84,7 +86,7 @@ lua-mods: $(foreach m,$(LUA_MODS),lua-modules/$(shell echo $(m)|cut -f1 -d/).sub
 	))
 
 	$(eval LUA_MODULES += $(foreach m,$(LUA_MODS),\
-		$(shell find $(MODSDIR)/$(m) -name "*.lua" -printf "$(m)=%P\n")\
+		$(shell find $(LUA_MODSDIR)/$(m) -name "*.lua" -printf "$(m)=%P\n")\
 	))
 
 lua-modules.clean:
@@ -103,7 +105,7 @@ lua-modules: lua-modules.clean lua-mods $(LUA_SUBMODULES)
 	@mkdir -p $(BUILDDIR)/kconfig/lxdialog
 	make -f config/kconfig/GNUmakefile TOPDIR=. SRCDIR=config/kconfig BUILDDIR=$(BUILDDIR) CONFIG_= $@
 
-nginx: $(NGX_TARGETS) nginx.src $(addsuffix .submodule, $(NGX_SUBMODULES))
+nginx: $(NGX_TARGETS) dependencies/nginx.src $(addsuffix .submodule, $(NGX_SUBMODULES))
 	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGX_CFG) \
 		--with-cc-opt='$(NGX_CC_OPTS)' \
 		--with-ld-opt='$(NGX_LD_OPTS)'
@@ -114,11 +116,14 @@ nginx: $(NGX_TARGETS) nginx.src $(addsuffix .submodule, $(NGX_SUBMODULES))
 	@strip $(BUILDDIR)/bin/nginx
 	@which upx >/dev/null && upx --best --ultra-brute $(BUILDDIR)/bin/nginx
 
+clean:
+	rm -rf $(BUILDDIR)/*
+
 version about: ;@git submodule status|cut -f2- -d/|sort
 %.version: ;@git submodule status|cut -f2- -d/|grep "^$* "|sed 's/^$* (\(.*\))/\1/'
 
 submodule_status: ;
-	$(eval SUBMODULES = \n$(shell git submodule --quiet foreach 'echo $${name}'))
+	$(eval SUBMODULES = \n$(shell git submodule --quiet foreach 'echo $${path}'))
 
 %.print_status:
 	$(eval N = $(shell echo $*|cut -f2 -d/))
@@ -141,8 +146,5 @@ submodule_status: ;
 	@$(MAKE) --no-print-directory $(D).print_status
 
 status: $(shell git submodule --quiet foreach 'echo $${path}.status')
-
-clean:
-	rm -rf $(BUILDDIR)/*
 
 # vim: ts=4 ai

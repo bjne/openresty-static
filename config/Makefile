@@ -12,7 +12,7 @@ endif
 ifeq ($(ENABLE_ZLIB_NG), y)
 	NGX_CFG += --with-zlib=$(BUILDDIR/zlib-ng)
 	NGX_CFG += --with-zlib-opt='-msse4.2 -mpclmul -O3 -static'
-	NGX_TARGETS += zlib-ng.src
+	NGX_TARGETS += dependencies/zlib-ng.src
 endif
 
 ifeq ($(ENABLE_TCP_FASTOPEN), y)
@@ -56,7 +56,7 @@ NGX_CFG += --prefix=$(NGX_PREFIX)
 
 ifeq ($(NGX_WITH_PCRE), y)
 	NGX_CFG += --with-pcre=$(BUILDDIR)/pcre
-	NGX_TARGETS += pcre.src
+	NGX_TARGETS += dependencies/pcre.src
 else
 	NGX_CFG += --without-pcre
 endif
@@ -348,8 +348,8 @@ ifeq ($(NGX_MODULE_ECHO_NGINX_MODULE), y)
 	NGX_MODULES += echo-nginx-module
 endif
 
-NGX_CFG += $(addprefix --add-module=$(DEPSDIR)/, $(NGX_MODULES))
-NGX_SUBMODULES += $(addprefix $(DEPSDIR)/, $(NGX_MODULES))
+NGX_CFG += $(addprefix --add-module=$(NGX_MODSDIR)/, $(NGX_MODULES))
+NGX_SUBMODULES += $(addprefix $(NGX_MODSDIR)/, $(NGX_MODULES))
 
 # lua modules
 

@@ -9,16 +9,16 @@
 	url = https://github.com/LuaJIT/LuaJIT
 	branch = v2.1
 [submodule "dependencies/lua-cjson"]
-	path = dependencies/lua-cjson
+	path = lua-modules/lua-cjson
 	url = https://github.com/openresty/lua-cjson
 [submodule "dependencies/lua-cmsgpack"]
-	path = dependencies/lua-cmsgpack
+	path = lua-modules/lua-cmsgpack
 	url = https://github.com/antirez/lua-cmsgpack
 [submodule "dependencies/zlib-ng"]
 	path = dependencies/zlib-ng
 	url = https://github.com/Dead2/zlib-ng/
 [submodule "dependencies/lua-nginx-module"]
-	path = dependencies/lua-nginx-module
+	path = ngx-modules/lua-nginx-module
 	url = https://github.com/openresty/lua-nginx-module
 [submodule "lua-modules/lua-resty-core"]
 	path = lua-modules/lua-resty-core
@@ -27,13 +27,13 @@
 	path = lua-modules/lua-resty-string
 	url = https://github.com/openresty/lua-resty-string
 [submodule "dependencies/set-misc-nginx-module"]
-	path = dependencies/set-misc-nginx-module
+	path = ngx-modules/set-misc-nginx-module
 	url = https://github.com/openresty/set-misc-nginx-module
 [submodule "dependencies/ngx_coolkit"]
-	path = dependencies/ngx_coolkit
+	path = ngx-modules/ngx_coolkit
 	url = https://github.com/FRiCKLE/ngx_coolkit
 [submodule "dependencies/ngx_devel_kit"]
-	path = dependencies/ngx_devel_kit
+	path = ngx-modules/ngx_devel_kit
 	url = https://github.com/simpl/ngx_devel_kit
 [submodule "lua-modules/lua-resty-dns"]
 	path = lua-modules/lua-resty-dns
@@ -51,16 +51,16 @@
 	path = lua-modules/lua-resty-upstream-healthcheck
 	url = https://github.com/openresty/lua-resty-upstream-healthcheck
 [submodule "dependencies/echo-nginx-module"]
-	path = dependencies/echo-nginx-module
+	path = ngx-modules/echo-nginx-module
 	url = https://github.com/openresty/echo-nginx-module
 [submodule "dependencies/srcache-nginx-module"]
-	path = dependencies/srcache-nginx-module
+	path = ngx-modules/srcache-nginx-module
 	url = https://github.com/openresty/srcache-nginx-module
 [submodule "dependencies/stream-lua-nginx-module"]
-	path = dependencies/stream-lua-nginx-module
+	path = ngx-modules/stream-lua-nginx-module
 	url = https://github.com/openresty/stream-lua-nginx-module
 [submodule "dependencies/nginx-rtmp-module"]
-	path = dependencies/nginx-rtmp-module
+	path = ngx-modules/nginx-rtmp-module
 	url = https://github.com/arut/nginx-rtmp-module
 [submodule "lua-modules/lua-resty-mysql"]
 	path = lua-modules/lua-resty-mysql
@@ -72,16 +72,16 @@
 	path = lua-modules/lua-resty-memcached
 	url = https://github.com/openresty/lua-resty-memcached
 [submodule "dependencies/encrypted-session-nginx-module"]
-	path = dependencies/encrypted-session-nginx-module
+	path = ngx-modules/encrypted-session-nginx-module
 	url = https://github.com/openresty/encrypted-session-nginx-module
 [submodule "dependencies/headers-more-nginx-module"]
-	path = dependencies/headers-more-nginx-module
+	path = ngx-modules/headers-more-nginx-module
 	url = https://github.com/openresty/headers-more-nginx-module
 [submodule "dependencies/lua-upstream-nginx-module"]
-	path = dependencies/lua-upstream-nginx-module
+	path = ngx-modules/lua-upstream-nginx-module
 	url = https://github.com/openresty/lua-upstream-nginx-module
 [submodule "dependencies/iconv-nginx-module"]
-	path = dependencies/iconv-nginx-module
+	path = ngx-modules/iconv-nginx-module
 	url = https://github.com/calio/iconv-nginx-module
 [submodule "lua-modules/lua-resty-upload"]
 	path = lua-modules/lua-resty-upload
@@ -99,5 +99,5 @@
 	path = lua-modules/lua-resty-kafka
 	url = https://github.com/doujiang24/lua-resty-kafka
 [submodule "dependencies/libucl"]
-	path = dependencies/libucl
+	path = lua-modules/libucl
 	url = https://github.com/vstakhov/libucl
