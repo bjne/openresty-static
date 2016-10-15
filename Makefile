@@ -18,6 +18,8 @@ NGX_LD_OPTS += -L$(LUADIR)
 
 include config/Makefile
 
+space := $(eval) $(eval)
+
 all: nginx
 
 %.submodule: ; @git submodule --quiet update --init $* || exit 0
@@ -114,6 +116,31 @@ nginx: $(NGX_TARGETS) nginx.src $(addsuffix .submodule, $(NGX_SUBMODULES))
 
 version about: ;@git submodule status|cut -f2- -d/|sort
 %.version: ;@git submodule status|cut -f2- -d/|grep "^$* "|sed 's/^$* (\(.*\))/\1/'
+
+submodule_status: ;
+	$(eval SUBMODULES = \n$(shell git submodule --quiet foreach 'echo $${name}'))
+
+%.print_status:
+	$(eval N = $(shell echo $*|cut -f2 -d/))
+	$(eval C = $(shell cd $* && git rev-parse HEAD))
+	$(eval C = $(shell cd $* && git describe --tags --always $(C)))
+
+	$(eval B = $(shell cd $* && git branch|tail -1|sed 's/^[* ]*//'))
+	$(eval U = $(shell cd $* && git rev-parse refs/heads/$(B)))
+	$(eval U = $(shell cd $* && git describe --tags --always $(U)))
+
+	@test "$(C)" = "$(U)" \
+		&& (printf "= %-35.35s %-20.20s\n" $N $C) \
+		|| (printf "+ %-35.35s %-20.20s %-20.20s\n" $N $C $U)
+
+%.status: submodule_status;
+	@$(eval D = $(shell echo -e \
+		'$(subst $(space),\n,$(SUBMODULES))'|grep -e '\(^\|/\)$*$$'))
+
+	@test -n "$D" || { echo "ERROR: Submodule $* not found" ; exit 1; }
+	@$(MAKE) --no-print-directory $(D).print_status
+
+status: $(shell git submodule --quiet foreach 'echo $${path}.status')
 
 clean:
 	rm -rf $(BUILDDIR)/*
