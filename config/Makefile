@@ -305,50 +305,54 @@ endif
 # external modules
 
 ifeq ($(NGX_MODULE_LUA_NGINX_MODULE), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/lua-nginx-module
+	NGX_MODULES += lua-nginx-module
 endif
 
 ifeq ($(NGX_MODULE_STREAM_LUA_NGINX_MODULE), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/stream-lua-nginx-module
+	NGX_MODULES += stream-lua-nginx-module
 endif
 
 ifeq ($(NGX_MODULE_LUA_UPSTREAM_NGINX_MODULE), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/lua-upstream-nginx-module
+	NGX_MODULES += lua-upstream-nginx-module
 endif
 
 ifeq ($(NGX_MODULE_HEADERS_MORE_NGINX_MODULE), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/headers-more-nginx-module
+	NGX_MODULES += headers-more-nginx-module
 endif
 
 ifeq ($(NGX_MODULE_ENCRYPTED_SESSION_NGINX_MODULE), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/encrypted-session-nginx-module
+	NGX_MODULES += encrypted-session-nginx-module
 endif
 
 ifeq ($(NGX_MODULE_ICONV_NGINX_MODULE), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/iconv-nginx-module
+	NGX_MODULES += iconv-nginx-module
 endif
 
 ifeq ($(NGX_MODULE_NGINX_RTMP_MODULE), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/nginx-rtmp-module
+	NGX_MODULES += nginx-rtmp-module
 endif
 
 ifeq ($(NGX_MODULE_NGX_DEVEL_KIT), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/ngx_devel_kit
+	NGX_MODULES += ngx_devel_kit
 endif
 
 ifeq ($(NGX_MODULE_SET_MISC_NGINX_MODULE), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/set-misc-nginx-module
+	NGX_MODULES += set-misc-nginx-module
 endif
 
 ifeq ($(NGX_MODULE_NGX_COOLKIT), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/ngx_coolkit
+	NGX_MODULES += ngx_coolkit
 endif
 
 ifeq ($(NGX_MODULE_ECHO_NGINX_MODULE), y)
-	NGX_CFG += --add-module=$(DEPSDIR)/echo-nginx-module
+	NGX_MODULES += echo-nginx-module
 endif
 
+NGX_CFG += $(addprefix --add-module=$(DEPSDIR)/, $(NGX_MODULES))
+NGX_SUBMODULES += $(addprefix $(DEPSDIR)/, $(NGX_MODULES))
+
 # lua modules
+
 
 ifeq ($(LUA_MODULE_CJSON), y)
 	LUAJIT_CFLAGS += -DLUAJIT_CJSON

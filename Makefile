@@ -18,21 +18,19 @@ NGX_LD_OPTS += -L$(LUADIR)
 
 include config/Makefile
 
-LUA_MODULES += $(foreach m,$(LUA_MODS),$(shell find $(MODSDIR)/$(m) -name "*.lua" -printf "$(m)=%P\n"))
-
 all: nginx
 
-%.src:
-	@$(MAKE) $*.tar
-	@$(MAKE) $*.patch
+%.submodule: ; @git submodule --quiet update --init $* || exit 0
 
-%.tar:
+%.src: %.patch ;
+
+%.patch: %.tar
+	@cat $(PATCHDIR)/$*/* 2>/dev/null|patch -p1 -d $(BUILDDIR)/$*
+
+%.tar: $(DEPSDIR)/%.submodule
 	@mkdir -p $(BUILDDIR)
 	@cd $(DEPSDIR)/$* ; \
 		git archive --format tar --prefix $*/ HEAD | tar x -C $(BUILDDIR)
-
-%.patch:
-	@cat $(PATCHDIR)/$*/* 2>/dev/null|patch -p1 -d $(BUILDDIR)/$*
 
 luajit: luajit.src $(LUAJIT_TARGETS)
 	@CFLAGS="$(LUAJIT_CFLAGS)" make -C $(LUADIR) libluajit.a
@@ -62,7 +60,8 @@ libucl: luajit.src libucl.src
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -lluajit-5.1 -llua-ucl)
 
 openssl: openssl.src $(BUILDDIR)/openssl/libssl.a $(BUILDDIR)/openssl/libcrypto.a
-	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive -ldl)
+	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ \
+		-Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive -ldl)
 	$(eval NGX_CC_OPTS += -I$(BUILDDIR)/$@/include)
 
 $(BUILDDIR)/openssl/%.a:
@@ -70,18 +69,30 @@ $(BUILDDIR)/openssl/%.a:
 	$(MAKE) -C $(BUILDDIR)/openssl
 
 %.lua.build:
-	$(eval DIRNAME=$(shell echo $*|cut -f1 -d=))
-	$(eval LUANAME=$(shell echo $*|cut -f2 -d=).lua)
-	$(eval MODNAME=$(shell echo $(LUANAME)|sed 's|/|_|g'))
+	$(eval D=$(shell echo $*|cut -f1 -d=))
+	$(eval L=$(shell echo $*|cut -f2 -d=).lua)
+	$(eval M=$(shell echo $(L)|sed 's|/|_|g'))
 
-	@ln -sf $(MODSDIR)/$(DIRNAME)/$(LUANAME) $(BUILDDIR)/lua-modules/$(MODNAME)
-	@luajit -bg $(BUILDDIR)/lua-modules/$(MODNAME) $(BUILDDIR)/lua-modules/$(MODNAME).o
+	@ln -sf $(MODSDIR)/$(D)/$(L) $(BUILDDIR)/lua-modules/$(M)
+	@luajit -bg $(BUILDDIR)/lua-modules/$(M) $(BUILDDIR)/lua-modules/$(M).o
+
+lua-mods: $(foreach m,$(LUA_MODS),lua-modules/$(shell echo $(m)|cut -f1 -d/).submodule)
+	$(eval LUA_SUBMODULES += $(foreach m,$(LUA_MODULES),\
+		$(shell echo lua-modules/$(m)|cut -f1 -d=|cut -f1-2 -d/).submodule\
+	))
+
+	$(eval LUA_MODULES += $(foreach m,$(LUA_MODS),\
+		$(shell find $(MODSDIR)/$(m) -name "*.lua" -printf "$(m)=%P\n")\
+	))
 
 lua-modules.clean:
 	@rm -f $(BUILDDIR)/lua-modules/*
 	@mkdir -p $(BUILDDIR)/lua-modules
 
-lua-modules: lua-modules.clean $(foreach module,$(LUA_MODULES),$(module).build)
+lua-modules.build: $(addsuffix .build, $(LUA_MODULES))
+
+lua-modules: lua-modules.clean lua-mods $(LUA_SUBMODULES)
+	@$(MAKE) $@.build LUA_MODULES="$(LUA_MODULES)"
 	@ar rcus $(BUILDDIR)/lua-modules/lib$@.a $(BUILDDIR)/$@/*.o
 	$(eval NGX_LD_OPTS += -L$(BUILDDIR)/$@ -Wl,--whole-archive -l$@ -Wl,--no-whole-archive)
 
@@ -90,7 +101,7 @@ lua-modules: lua-modules.clean $(foreach module,$(LUA_MODULES),$(module).build)
 	@mkdir -p $(BUILDDIR)/kconfig/lxdialog
 	make -f config/kconfig/GNUmakefile TOPDIR=. SRCDIR=config/kconfig BUILDDIR=$(BUILDDIR) CONFIG_= $@
 
-nginx: $(NGX_TARGETS) zlib-ng.src nginx.src
+nginx: $(NGX_TARGETS) nginx.src $(addsuffix .submodule, $(NGX_SUBMODULES))
 	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGX_CFG) \
 		--with-cc-opt='$(NGX_CC_OPTS)' \
 		--with-ld-opt='$(NGX_LD_OPTS)'
