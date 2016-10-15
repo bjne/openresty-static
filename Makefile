@@ -35,6 +35,10 @@ all: nginx
 	$(eval M = $(shell basename $*))
 	@mkdir -p $(BUILDDIR)
 	@cd $* ; git archive --format tar --prefix $(M)/ HEAD | tar x -C $(BUILDDIR)
+	@cd $* ; grep '^gitdir:' .git >/dev/null 2>&1 \
+		&& git submodule --quiet update --init \
+		&& git submodule --quiet foreach \
+			'git archive HEAD|tar x -C $(BUILDDIR)/$(M)/$$path'
 
 luajit: dependencies/luajit.src $(LUAJIT_TARGETS)
 	@CFLAGS="$(LUAJIT_CFLAGS)" make -C $(LUADIR) libluajit.a
@@ -104,6 +108,8 @@ lua-modules: lua-modules.clean lua-mods $(LUA_SUBMODULES)
 	@touch $(CURDIR)/.config
 	@mkdir -p $(BUILDDIR)/kconfig/lxdialog
 	make -f config/kconfig/GNUmakefile TOPDIR=. SRCDIR=config/kconfig BUILDDIR=$(BUILDDIR) CONFIG_= $@
+
+rumprun: dependencies/rumprun.src
 
 nginx: $(NGX_TARGETS) dependencies/nginx.src $(addsuffix .submodule, $(NGX_SUBMODULES))
 	@cd $(BUILDDIR)/nginx && ./auto/configure $(NGX_CFG) \
