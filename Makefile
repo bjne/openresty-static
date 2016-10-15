@@ -112,6 +112,9 @@ nginx: $(NGX_TARGETS) nginx.src $(addsuffix .submodule, $(NGX_SUBMODULES))
 	@strip $(BUILDDIR)/bin/nginx
 	@which upx >/dev/null && upx --best --ultra-brute $(BUILDDIR)/bin/nginx
 
+version about: ;@git submodule status|cut -f2- -d/|sort
+%.version: ;@git submodule status|cut -f2- -d/|grep "^$* "|sed 's/^$* (\(.*\))/\1/'
+
 clean:
 	rm -rf $(BUILDDIR)/*
 
